@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { 
   ArrowLeft,
   Save,
-  Plus,
   Trash2,
   GripVertical,
   Zap,
@@ -67,7 +66,7 @@ export default function WorkflowBuilderPage() {
     const data = {
       name,
       description,
-      status: 'draft',
+      status: 'draft' as const,
       steps: steps.map((step, index) => ({
         name: step.name,
         type: step.type,

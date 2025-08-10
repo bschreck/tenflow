@@ -11,6 +11,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!frontend/src/lib
 lib64/
 parts/
 sdist/
@@ -193,7 +194,6 @@ dist
 
 # Gatsby files
 .cache/
-public
 
 # Vite build output
 dist/
@@ -226,9 +226,6 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Docker
-.dockerignore
 
 # Database
 *.db

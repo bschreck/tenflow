@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="50%" stop-color="#0ea5e9" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#g1)"/>
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+  <circle cx="60%" cy="35%" r="600" fill="url(#glow)"/>
+  <g opacity="0.15">
+    <path d="M0,820 C300,760 500,740 800,760 C1120,780 1280,700 1600,640 C1760,608 1840,608 1920,620 L1920,1080 L0,1080 Z" fill="#0f172a"/>
+    <path d="M0,860 C260,800 520,800 820,820 C1120,840 1380,760 1680,720 C1800,704 1860,704 1920,710 L1920,1080 L0,1080 Z" fill="#0b1220"/>
+  </g>
+</svg>

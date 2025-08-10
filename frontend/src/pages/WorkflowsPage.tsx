@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { workflowsAPI } from '@/lib/api'
+import type { Workflow } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
 import { 
   Plus, 
-  Workflow, 
+  Workflow as WorkflowIcon, 
   Play, 
   Edit, 
   Trash2,
-  MoreVertical,
   Search
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -22,7 +22,7 @@ export default function WorkflowsPage() {
     queryFn: workflowsAPI.list,
   })
 
-  const filteredWorkflows = workflows.filter((w: any) => 
+  const filteredWorkflows = workflows.filter((w: Workflow) => 
     w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     w.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -71,7 +71,7 @@ export default function WorkflowsPage() {
       {filteredWorkflows.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <Workflow className="mx-auto h-12 w-12 text-muted-foreground/50" />
+            <WorkflowIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
             <h3 className="mt-4 text-lg font-semibold">
               {searchTerm ? 'No workflows found' : 'No workflows yet'}
             </h3>
@@ -90,7 +90,7 @@ export default function WorkflowsPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredWorkflows.map((workflow: any) => (
+          {filteredWorkflows.map((workflow: Workflow) => (
             <Card key={workflow.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
