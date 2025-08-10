@@ -10,5 +10,10 @@
       "src": "/(.*)",
       "dest": "src/tenflow/main.py"
     }
-  ]
+  ],
+  "functions": {
+    "src/tenflow/main.py": {
+      "maxDuration": 30
+    }
+  }
 }

@@ -9,16 +9,16 @@ from httpx import AsyncClient
 
 @pytest.fixture
 def env_vars():
-    original_db = os.environ.get("POSTGRES_DB", "tenflow")
+    original_db = os.environ.get("POSTGRES_DATABASE", "tenflow")
     # Include worker ID if available to ensure unique DBs per worker
     worker_id = os.environ.get("PYTEST_XDIST_WORKER", "")
     new_db = f"test_{worker_id}_{uuid.uuid4().hex}" if worker_id else f"test_{uuid.uuid4().hex}"
     env = {
-        "ORIGINAL_POSTGRES_DB": original_db,
+        "ORIGINAL_POSTGRES_DATABASE": original_db,
         "ENV": "test",
         "POSTGRES_USER": "postgres",
         "POSTGRES_PASSWORD": "password",
-        "POSTGRES_DB": new_db,
+        "POSTGRES_DATABASE": new_db,
         "POSTGRES_HOST": "localhost",
         "POSTGRES_PORT": "5432",
         "SECRET_KEY": "your-secret-key-here-change-in-production",
@@ -41,7 +41,7 @@ def env_vars():
     return env
     
 def drop_database(conn, db_name):
-    if db_name == os.environ["ORIGINAL_POSTGRES_DB"]:
+    if db_name == os.environ["ORIGINAL_POSTGRES_DATABASE"]:
         raise ValueError(f"Cowardly refusing to drop original database {db_name}")
     conn.execute(text(f"DROP DATABASE IF EXISTS \"{db_name}\""))
 
@@ -55,9 +55,9 @@ async def root_engine(env_vars):
 @pytest.fixture
 async def new_db(root_engine, env_vars):
     with root_engine.connect() as conn:
-        conn.execute(text(f"CREATE DATABASE \"{env_vars['POSTGRES_DB']}\""))
+        conn.execute(text(f"CREATE DATABASE \"{env_vars['POSTGRES_DATABASE']}\""))
         yield
-        drop_database(conn, env_vars["POSTGRES_DB"])
+        drop_database(conn, env_vars["POSTGRES_DATABASE"])
 
 
 @pytest.fixture
