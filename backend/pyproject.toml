@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=42", "uv"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "tenflow-backend"
 version = "0.1.0"
