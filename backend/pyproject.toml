@@ -1,0 +1,93 @@
+[project]
+name = "tenflow-backend"
+version = "0.1.0"
+description = "Tenflow API"
+requires-python = "~=3.12"
+dependencies = [
+  "psycopg2-binary==2.9.10",
+  "alembic==1.16.4",
+  "pydantic-settings==2.10.0",
+  "python-jose[cryptography]==3.5.0",
+  "passlib[bcrypt]==1.7.4",
+  "python-multipart==0.0.20",
+  "python-dotenv==1.1.0",
+  "httpx==0.28.1",
+  "asyncpg==0.30.0",
+  "watchfiles==1.1.0",
+  "fastapi>=0.116.1",
+  "uvicorn[standard]>=0.35.0",
+  "sqlmodel==0.0.24",
+]
+
+[tool.uv]
+dev-dependencies = [
+  "pytest>=7.4.4",
+  "pytest-asyncio==0.23.8",
+  "pytest-xdist>=3.5.0",
+  "ruff>=0.12.8",
+]
+
+package = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [
+    "migrations/versions"
+]
+
+
+[tool.ruff.lint]
+
+select = [
+    "A", # prevent using keywords that clobber python builtins
+    "B", # bugbear: security warnings
+    "E", # pycodestyle
+    "F", # pyflakes
+    "ISC", # implicit string concatenation
+    "UP", # alert you when better syntax is available in your python version
+    "RUF", # the ruff developer's own rules
+]
+ignore = [
+    #### modules
+
+    # TODO: Remove temporary ignores
+    "A001", # TODO: clean up variables that clobber builtins
+    "A002", # TODO: clean up variables that clobber builtins
+    "A005", # TODO: clean up filenames that clobber builtins
+    "ANN",
+
+    #### specific rules
+    "D", # For now, ignore docstring formatting rules
+    "Q000",
+    "Q003",
+    "E402", # false positives for local imports
+    "TRY003", # external messages in exceptions are too verbose
+    "TD002",
+    "TD003",
+    "E501",
+    "FIX002", # too verbose descriptions of todos
+    "B008", # incompatible with FastAPI
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = 'single'
+indent-style = 'space'
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101", # asserts allowed in tests...
+    "ARG", # Unused function args -> fixtures nevertheless are functionally relevant...
+    "FBT", # Don't care about booleans as positional arguments in tests, e.g. via @pytest.mark.parametrize()
+    "PLR2004", # Magic value used in comparison, ...
+    "S311", # Standard pseudo-random generators are not suitable for cryptographic purposes
+    "SIM117",
+]
