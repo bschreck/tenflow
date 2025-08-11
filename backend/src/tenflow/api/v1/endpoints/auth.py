@@ -35,5 +35,4 @@ def login(
     access_token = security.create_access_token(
         subject=user.id, expires_delta=access_token_expires
     )
-    print('access_token', access_token)
     return Token(access_token=access_token, token_type="bearer")

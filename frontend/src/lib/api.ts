@@ -54,11 +54,7 @@ export const authAPI = {
     formData.append('username', username);
     formData.append('password', password);
     
-    const response = await api.post<AuthResponse>('/auth/login', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.post<AuthResponse>('/auth/login', formData);
     console.log('response', response)
     return response.data;
   },
