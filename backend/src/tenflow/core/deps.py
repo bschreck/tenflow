@@ -6,14 +6,14 @@ from pydantic import ValidationError
 from sqlmodel import Session, select
 
 from tenflow.config import settings
-from tenflow.database import get_session
+from tenflow.database import get_session_gen
 from tenflow.models import User, TokenPayload
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
 
 def get_current_user(
-    session: Session = Depends(get_session), token: str = Depends(oauth2_scheme)
+    session: Session = Depends(get_session_gen), token: str = Depends(oauth2_scheme)
 ) -> User:
     try:
         payload = jwt.decode(

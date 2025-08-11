@@ -3,7 +3,8 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from tenflow.core.deps import get_current_active_user, get_session
+from tenflow.database import get_session_gen
+from tenflow.core.deps import get_current_active_user
 from tenflow.models import (
     User, Workflow, WorkflowCreate, WorkflowRead, WorkflowUpdate,
     WorkflowStep, WorkflowStepCreate,
@@ -16,7 +17,7 @@ router = APIRouter()
 @router.post("/", response_model=WorkflowRead)
 def create_workflow(
     *,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     workflow_in: WorkflowCreate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -52,7 +53,7 @@ def create_workflow(
 
 @router.get("/", response_model=List[WorkflowRead])
 def read_workflows(
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_active_user),
@@ -70,7 +71,7 @@ def read_workflows(
 @router.get("/{workflow_id}", response_model=WorkflowRead)
 def read_workflow(
     workflow_id: int,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """
@@ -88,7 +89,7 @@ def read_workflow(
 def update_workflow(
     *,
     workflow_id: int,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     workflow_in: WorkflowUpdate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -121,7 +122,7 @@ def update_workflow(
 @router.delete("/{workflow_id}")
 def delete_workflow(
     workflow_id: int,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """
@@ -141,7 +142,7 @@ def delete_workflow(
 @router.post("/{workflow_id}/run", response_model=WorkflowRunRead)
 def run_workflow(
     workflow_id: int,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """
@@ -179,7 +180,7 @@ def run_workflow(
 @router.get("/{workflow_id}/runs", response_model=List[WorkflowRunRead])
 def read_workflow_runs(
     workflow_id: int,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_active_user),

@@ -59,6 +59,7 @@ export const authAPI = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    console.log('response', response)
     return response.data;
   },
   

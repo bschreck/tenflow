@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from tenflow.core import security
-from tenflow.core.deps import get_current_active_user, get_current_active_superuser, get_session
+from tenflow.core.deps import get_current_active_user, get_current_active_superuser
+from tenflow.database import get_session_gen
 from tenflow.models import User, UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
@@ -12,7 +13,7 @@ router = APIRouter()
 @router.post("/", response_model=UserRead)
 def create_user(
     *,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     user_in: UserCreate,
 ) -> Any:
     """
@@ -61,7 +62,7 @@ def read_user_me(
 @router.put("/me", response_model=UserRead)
 def update_user_me(
     *,
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     user_in: UserUpdate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -87,7 +88,7 @@ def update_user_me(
 def read_user_by_id(
     user_id: int,
     current_user: User = Depends(get_current_active_user),
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
 ) -> Any:
     """
     Get a specific user by id.
@@ -103,7 +104,7 @@ def read_user_by_id(
 
 @router.get("/", response_model=List[UserRead])
 def read_users(
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_active_superuser),

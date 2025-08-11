@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 
 from tenflow.config import settings
 from tenflow.core import security
-from tenflow.database import get_session
+from tenflow.database import get_session_gen
 from tenflow.models import User, Token
 
 router = APIRouter()
@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 def login(
-    session: Session = Depends(get_session),
+    session: Session = Depends(get_session_gen),
     form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
     """
@@ -22,7 +22,6 @@ def login(
     """
     statement = select(User).where(User.username == form_data.username)
     user = session.exec(statement).first()
-    
     if not user or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -36,4 +35,5 @@ def login(
     access_token = security.create_access_token(
         subject=user.id, expires_delta=access_token_expires
     )
+    print('access_token', access_token)
     return Token(access_token=access_token, token_type="bearer")
