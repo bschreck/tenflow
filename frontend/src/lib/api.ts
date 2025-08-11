@@ -10,7 +10,7 @@ import type {
 } from './types';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-const API_BASE_URL = backendUrl + '/api/v1';
+const API_BASE_URL = backendUrl.replace(/\/$/, '') + '/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
