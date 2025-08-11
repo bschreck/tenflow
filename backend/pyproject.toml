@@ -3,7 +3,7 @@ requires = ["setuptools>=42", "uv"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tenflow-backend"
+name = "tenflow"
 version = "0.1.0"
 description = "Tenflow API"
 requires-python = "~=3.12"
@@ -21,6 +21,7 @@ dependencies = [
   "fastapi>=0.116.1",
   "uvicorn[standard]>=0.35.0",
   "sqlmodel==0.0.24",
+  "modal>=1.1.1",
 ]
 
 [tool.uv]

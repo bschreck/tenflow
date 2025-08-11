@@ -66,6 +66,7 @@ prod: ## Build for production
 migrate: ensure-dev-start-prereqs ## Run database migrations
 	docker compose exec backend uv run alembic upgrade head
 
+
 # Migration helpers
 MIG_MSG ?= "update"
 STEP ?= 1
@@ -129,3 +130,9 @@ tools-up: ensure-dev-start-prereqs ## Start extra tools (pgAdmin) profile
 
 tools-down: ensure-dev-start-prereqs ## Stop extra tools profile
 	docker compose --profile tools down
+
+modal-deploy:
+	cd backend && MODAL_ENVIRONMENT=tenflow uv run modal deploy modal_deploy.py
+
+modal-migrate:
+	cd backend && MODAL_ENVIRONMENT=tenflow uv run modal run modal_deploy.py::run_migrations

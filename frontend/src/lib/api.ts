@@ -9,7 +9,8 @@ import type {
   WorkflowRun 
 } from './types';
 
-const API_BASE_URL = '/api/v1';
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+const API_BASE_URL = backendUrl + '/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
