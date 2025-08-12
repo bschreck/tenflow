@@ -1,12 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { workflowsAPI } from '@/lib/api'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { 
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
   ArrowLeft,
   Save,
   Trash2,
@@ -14,73 +7,109 @@ import {
   Zap,
   Clock,
   Filter,
-  Send
-} from 'lucide-react'
+  Send,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { workflowsAPI } from "@/lib/api";
+import { WorkflowStep, UpdateWorkflowRequest } from "@/lib/types";
 
 const stepTypes = [
-  { value: 'trigger', label: 'Trigger', icon: Zap, description: 'Start the workflow' },
-  { value: 'action', label: 'Action', icon: Send, description: 'Perform an action' },
-  { value: 'condition', label: 'Condition', icon: Filter, description: 'Add conditional logic' },
-  { value: 'delay', label: 'Delay', icon: Clock, description: 'Wait for a period' },
-]
+  {
+    value: "trigger",
+    label: "Trigger",
+    icon: Zap,
+    description: "Start the workflow",
+  },
+  {
+    value: "action",
+    label: "Action",
+    icon: Send,
+    description: "Perform an action",
+  },
+  {
+    value: "condition",
+    label: "Condition",
+    icon: Filter,
+    description: "Add conditional logic",
+  },
+  {
+    value: "delay",
+    label: "Delay",
+    icon: Clock,
+    description: "Wait for a period",
+  },
+];
 
 export default function WorkflowBuilderPage() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const isEditing = !!id
-  const workflowId = id ? parseInt(id) : undefined
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const isEditing = !!id;
+  const workflowId = id ? parseInt(id) : undefined;
 
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [steps, setSteps] = useState<any[]>([])
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [steps, setSteps] = useState<WorkflowStep[]>([]);
 
   const { data: workflow } = useQuery({
-    queryKey: ['workflow', workflowId],
+    queryKey: ["workflow", workflowId],
     queryFn: () => workflowsAPI.get(workflowId!),
     enabled: !!workflowId,
-  })
+  });
 
   useEffect(() => {
     if (workflow) {
-      setName(workflow.name)
-      setDescription(workflow.description || '')
-      setSteps(workflow.steps || [])
+      setName(workflow.name);
+      setDescription(workflow.description || "");
+      setSteps(workflow.steps || []);
     }
-  }, [workflow])
+  }, [workflow]);
 
   const createMutation = useMutation({
     mutationFn: workflowsAPI.create,
     onSuccess: () => {
-      navigate('/workflows')
+      navigate("/workflows");
     },
-  })
+  });
 
   const updateMutation = useMutation({
-    mutationFn: (data: any) => workflowsAPI.update(workflowId!, data),
+    mutationFn: (data: UpdateWorkflowRequest) =>
+      workflowsAPI.update(workflowId!, data),
     onSuccess: () => {
-      navigate('/workflows')
+      navigate("/workflows");
     },
-  })
+  });
 
   const handleSave = () => {
     const data = {
       name,
       description,
-      status: 'draft' as const,
+      status: "draft" as const,
       steps: steps.map((step, index) => ({
         name: step.name,
         type: step.type,
         position: index,
         configuration: {},
       })),
-    }
+    };
 
     if (isEditing) {
-      updateMutation.mutate(data)
+      updateMutation.mutate(data);
     } else {
-      createMutation.mutate(data)
+      createMutation.mutate(data);
     }
-  }
+  };
 
   const addStep = (type: string) => {
     const newStep = {
@@ -88,19 +117,19 @@ export default function WorkflowBuilderPage() {
       name: `New ${type}`,
       type,
       configuration: {},
-    }
-    setSteps([...steps, newStep])
-  }
+    };
+    setSteps([...steps, newStep]);
+  };
 
   const removeStep = (index: number) => {
-    setSteps(steps.filter((_, i) => i !== index))
-  }
+    setSteps(steps.filter((_, i) => i !== index));
+  };
 
-  const updateStep = (index: number, updates: any) => {
-    const newSteps = [...steps]
-    newSteps[index] = { ...newSteps[index], ...updates }
-    setSteps(newSteps)
-  }
+  const updateStep = (index: number, updates: Partial<WorkflowStep>) => {
+    const newSteps = [...steps];
+    newSteps[index] = { ...newSteps[index], ...updates };
+    setSteps(newSteps);
+  };
 
   return (
     <div className="space-y-8">
@@ -113,7 +142,7 @@ export default function WorkflowBuilderPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              {isEditing ? 'Edit Workflow' : 'Create Workflow'}
+              {isEditing ? "Edit Workflow" : "Create Workflow"}
             </h1>
             <p className="text-muted-foreground">
               Design your automation workflow
@@ -171,7 +200,10 @@ export default function WorkflowBuilderPage() {
               {steps.length > 0 ? (
                 <div className="space-y-4">
                   {steps.map((step, index) => (
-                    <div key={step.id || index} className="flex items-start space-x-4 p-4 border rounded-lg">
+                    <div
+                      key={step.id || index}
+                      className="flex items-start space-x-4 p-4 border rounded-lg"
+                    >
                       <div className="flex-shrink-0 pt-2">
                         <GripVertical className="h-5 w-5 text-muted-foreground" />
                       </div>
@@ -196,7 +228,9 @@ export default function WorkflowBuilderPage() {
                         <Input
                           placeholder="Step name"
                           value={step.name}
-                          onChange={(e) => updateStep(index, { name: e.target.value })}
+                          onChange={(e) =>
+                            updateStep(index, { name: e.target.value })
+                          }
                         />
                       </div>
                     </div>
@@ -225,7 +259,7 @@ export default function WorkflowBuilderPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               {stepTypes.map((type) => {
-                const Icon = type.icon
+                const Icon = type.icon;
                 return (
                   <Button
                     key={type.value}
@@ -241,7 +275,7 @@ export default function WorkflowBuilderPage() {
                       </div>
                     </div>
                   </Button>
-                )
+                );
               })}
             </CardContent>
           </Card>
@@ -260,5 +294,5 @@ export default function WorkflowBuilderPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

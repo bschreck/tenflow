@@ -1,43 +1,51 @@
-import { useQuery } from '@tanstack/react-query'
-import { workflowsAPI } from '@/lib/api'
-import type { Workflow } from '@/lib/types'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Link } from 'react-router-dom'
-import { 
-  Plus, 
-  Workflow as WorkflowIcon, 
-  Play, 
-  Edit, 
+import { useQuery } from "@tanstack/react-query";
+import {
+  Plus,
+  Workflow as WorkflowIcon,
+  Play,
+  Edit,
   Trash2,
-  Search
-} from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { useState } from 'react'
+  Search,
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { workflowsAPI } from "@/lib/api";
+import type { Workflow } from "@/lib/types";
 
 export default function WorkflowsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState("");
   const { data: workflows = [], refetch } = useQuery({
-    queryKey: ['workflows'],
+    queryKey: ["workflows"],
     queryFn: workflowsAPI.list,
-  })
+  });
 
-  const filteredWorkflows = workflows.filter((w: Workflow) => 
-    w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    w.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredWorkflows = workflows.filter(
+    (w: Workflow) =>
+      w.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      w.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this workflow?')) {
-      await workflowsAPI.delete(id)
-      refetch()
+    if (confirm("Are you sure you want to delete this workflow?")) {
+      await workflowsAPI.delete(id);
+      refetch();
     }
-  }
+  };
 
   const handleRun = async (id: number) => {
-    await workflowsAPI.run(id)
-    alert('Workflow executed successfully!')
-  }
+    await workflowsAPI.run(id);
+    alert("Workflow executed successfully!");
+  };
 
   return (
     <div className="space-y-8">
@@ -73,10 +81,12 @@ export default function WorkflowsPage() {
           <CardContent className="text-center py-12">
             <WorkflowIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
             <h3 className="mt-4 text-lg font-semibold">
-              {searchTerm ? 'No workflows found' : 'No workflows yet'}
+              {searchTerm ? "No workflows found" : "No workflows yet"}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {searchTerm ? 'Try adjusting your search' : 'Create your first workflow to get started'}
+              {searchTerm
+                ? "Try adjusting your search"
+                : "Create your first workflow to get started"}
             </p>
             {!searchTerm && (
               <Button asChild className="mt-4">
@@ -91,22 +101,27 @@ export default function WorkflowsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredWorkflows.map((workflow: Workflow) => (
-            <Card key={workflow.id} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={workflow.id}
+              className="hover:shadow-lg transition-shadow"
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <CardTitle className="text-lg">{workflow.name}</CardTitle>
                     <CardDescription>
-                      {workflow.description || 'No description'}
+                      {workflow.description || "No description"}
                     </CardDescription>
                   </div>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    workflow.status === 'active' 
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                      : workflow.status === 'paused'
-                      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      : 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400'
-                  }`}>
+                  <div
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      workflow.status === "active"
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                        : workflow.status === "paused"
+                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                          : "bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400"
+                    }`}
+                  >
                     {workflow.status}
                   </div>
                 </div>
@@ -124,11 +139,7 @@ export default function WorkflowsPage() {
                     >
                       <Play className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                    >
+                    <Button variant="ghost" size="icon" asChild>
                       <Link to={`/workflows/${workflow.id}/edit`}>
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -148,5 +159,5 @@ export default function WorkflowsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

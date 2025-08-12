@@ -1,41 +1,49 @@
-import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { workflowsAPI } from '@/lib/api'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { 
+import { useQuery } from "@tanstack/react-query";
+import {
   ArrowLeft,
   Play,
   Edit,
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
-} from 'lucide-react'
+  AlertCircle,
+} from "lucide-react";
+import { useParams, Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { workflowsAPI } from "@/lib/api";
+import { WorkflowStep, WorkflowRun } from "@/lib/types";
 
 export default function WorkflowDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const workflowId = parseInt(id!)
+  const { id } = useParams<{ id: string }>();
+  const workflowId = parseInt(id!);
 
   const { data: workflow } = useQuery({
-    queryKey: ['workflow', workflowId],
+    queryKey: ["workflow", workflowId],
     queryFn: () => workflowsAPI.get(workflowId),
     enabled: !!workflowId,
-  })
+  });
 
   const { data: runs = [] } = useQuery({
-    queryKey: ['workflow-runs', workflowId],
+    queryKey: ["workflow-runs", workflowId],
     queryFn: () => workflowsAPI.getRuns(workflowId),
     enabled: !!workflowId,
-  })
+  });
 
   const handleRun = async () => {
-    await workflowsAPI.run(workflowId)
-    alert('Workflow executed successfully!')
-  }
+    await workflowsAPI.run(workflowId);
+    alert("Workflow executed successfully!");
+  };
 
   if (!workflow) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -48,9 +56,11 @@ export default function WorkflowDetailPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{workflow.name}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {workflow.name}
+            </h1>
             <p className="text-muted-foreground">
-              {workflow.description || 'No description'}
+              {workflow.description || "No description"}
             </p>
           </div>
         </div>
@@ -75,13 +85,15 @@ export default function WorkflowDetailPage() {
             <CardTitle className="text-sm font-medium">Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-              workflow.status === 'active' 
-                ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                : workflow.status === 'paused'
-                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400'
-            }`}>
+            <div
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                workflow.status === "active"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                  : workflow.status === "paused"
+                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                    : "bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400"
+              }`}
+            >
               {workflow.status}
             </div>
           </CardContent>
@@ -117,14 +129,19 @@ export default function WorkflowDetailPage() {
         <CardContent>
           {workflow.steps && workflow.steps.length > 0 ? (
             <div className="space-y-4">
-              {workflow.steps.map((step: any, index: number) => (
-                <div key={step.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+              {workflow.steps.map((step: WorkflowStep, index: number) => (
+                <div
+                  key={step.id}
+                  className="flex items-center space-x-4 p-4 border rounded-lg"
+                >
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium">{step.name}</p>
-                    <p className="text-sm text-muted-foreground">Type: {step.type}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Type: {step.type}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -141,21 +158,30 @@ export default function WorkflowDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle>Recent Runs</CardTitle>
-          <CardDescription>
-            Execution history for this workflow
-          </CardDescription>
+          <CardDescription>Execution history for this workflow</CardDescription>
         </CardHeader>
         <CardContent>
           {runs.length > 0 ? (
             <div className="space-y-4">
-              {runs.slice(0, 10).map((run: any) => (
-                <div key={run.id} className="flex items-center justify-between p-4 border rounded-lg">
+              {runs.slice(0, 10).map((run: WorkflowRun) => (
+                <div
+                  key={run.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex items-center space-x-4">
                     <div>
-                      {run.status === 'success' && <CheckCircle className="h-5 w-5 text-green-500" />}
-                      {run.status === 'failed' && <XCircle className="h-5 w-5 text-red-500" />}
-                      {run.status === 'running' && <Clock className="h-5 w-5 text-blue-500" />}
-                      {run.status === 'pending' && <AlertCircle className="h-5 w-5 text-yellow-500" />}
+                      {run.status === "success" && (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      )}
+                      {run.status === "failed" && (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      {run.status === "running" && (
+                        <Clock className="h-5 w-5 text-blue-500" />
+                      )}
+                      {run.status === "pending" && (
+                        <AlertCircle className="h-5 w-5 text-yellow-500" />
+                      )}
                     </div>
                     <div>
                       <p className="font-medium">Run #{run.id}</p>
@@ -165,15 +191,17 @@ export default function WorkflowDetailPage() {
                     </div>
                   </div>
                   <div className="text-sm">
-                    <span className={`px-2 py-1 rounded-full ${
-                      run.status === 'success' 
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                        : run.status === 'failed'
-                        ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                        : run.status === 'running'
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full ${
+                        run.status === "success"
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                          : run.status === "failed"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                            : run.status === "running"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+                              : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                      }`}
+                    >
                       {run.status}
                     </span>
                   </div>
@@ -188,5 +216,5 @@ export default function WorkflowDetailPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

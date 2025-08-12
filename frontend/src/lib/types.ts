@@ -21,7 +21,7 @@ export interface Workflow {
   id: number;
   name: string;
   description?: string;
-  status: 'draft' | 'active' | 'paused' | 'stopped';
+  status: "draft" | "active" | "paused" | "stopped";
   steps: WorkflowStep[];
   created_at: string;
   updated_at: string;
@@ -31,7 +31,7 @@ export interface Workflow {
 export interface WorkflowRun {
   id: number;
   workflow_id: number;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: "pending" | "running" | "completed" | "failed";
   started_at: string;
   completed_at?: string;
   result?: Record<string, any>;
@@ -40,8 +40,8 @@ export interface WorkflowRun {
 export interface CreateWorkflowRequest {
   name: string;
   description?: string;
-  status?: 'draft' | 'active' | 'paused' | 'stopped';
-  steps: Omit<WorkflowStep, 'id'>[];
+  status?: "draft" | "active" | "paused" | "stopped";
+  steps: Omit<WorkflowStep, "id">[];
 }
 
 export interface UpdateWorkflowRequest extends Partial<CreateWorkflowRequest> {

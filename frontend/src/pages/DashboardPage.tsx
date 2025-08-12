@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { ArrowRight, Star, Users, Target } from 'lucide-react'
+import { ArrowRight, Star, Users, Target } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
   return (
@@ -9,9 +10,9 @@ export default function DashboardPage() {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: 'url(/hero-placeholder.svg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundImage: "url(/hero-placeholder.svg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
           aria-hidden
         />
@@ -46,17 +47,22 @@ export default function DashboardPage() {
 
           {/* Headline */}
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight drop-shadow-md">TenFlow</h1>
+            <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight drop-shadow-md">
+              TenFlow
+            </h1>
             <p className="mt-4 text-2xl sm:text-3xl font-medium opacity-95">
               AI-Powered Adaptive Training for Trail & Ultra Runners
             </p>
             <p className="mt-6 text-base sm:text-lg leading-relaxed opacity-90">
-              Science-based coaching that adapts to your real health in real time. No rigid templates, just
-              personalized training that works.
+              Science-based coaching that adapts to your real health in real
+              time. No rigid templates, just personalized training that works.
             </p>
 
             <div className="mt-10">
-              <Button size="lg" className="h-12 px-8 text-base bg-white text-slate-900 hover:bg-white/90">
+              <Button
+                size="lg"
+                className="h-12 px-8 text-base bg-white text-slate-900 hover:bg-white/90"
+              >
                 Start Your Journey
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -69,5 +75,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

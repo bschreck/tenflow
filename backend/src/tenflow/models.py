@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, Any
 from datetime import datetime, date
 from uuid import UUID, uuid4
 from decimal import Decimal
@@ -8,37 +8,37 @@ import enum
 
 # Enums
 class WorkflowStatus(str, enum.Enum):
-    DRAFT = "draft"
-    ACTIVE = "active"
-    PAUSED = "paused"
-    ARCHIVED = "archived"
+    DRAFT = 'draft'
+    ACTIVE = 'active'
+    PAUSED = 'paused'
+    ARCHIVED = 'archived'
 
 
 class RunStatus(str, enum.Enum):
-    PENDING = "pending"
-    RUNNING = "running"
-    SUCCESS = "success"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
+    PENDING = 'pending'
+    RUNNING = 'running'
+    SUCCESS = 'success'
+    FAILED = 'failed'
+    CANCELLED = 'cancelled'
 
 
 # User Models
 class UserBase(SQLModel):
     email: str = Field(unique=True, index=True)
     username: str = Field(unique=True, index=True)
-    full_name: Optional[str] = None
+    full_name: str | None = None
     is_active: bool = True
     is_superuser: bool = False
 
 
 class User(UserBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = None
-    
+    updated_at: datetime | None = None
+
     # Relationships
-    workflows: List["Workflow"] = Relationship(back_populates="user")
+    workflows: list['Workflow'] = Relationship(back_populates='user')
 
 
 class UserCreate(UserBase):
@@ -48,34 +48,34 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
 
 class UserUpdate(SQLModel):
-    email: Optional[str] = None
-    username: Optional[str] = None
-    full_name: Optional[str] = None
-    password: Optional[str] = None
-    is_active: Optional[bool] = None
-    is_superuser: Optional[bool] = None
+    email: str | None = None
+    username: str | None = None
+    full_name: str | None = None
+    password: str | None = None
+    is_active: bool | None = None
+    is_superuser: bool | None = None
 
 
 # Workflow Step Models
 class WorkflowStepBase(SQLModel):
     name: str
     type: str  # e.g., "trigger", "action", "condition"
-    configuration: Dict[str, Any] = Field(default={}, sa_column=Column(JSON))
+    configuration: dict[str, Any] = Field(default={}, sa_column=Column(JSON))
     position: int
 
 
 class WorkflowStep(WorkflowStepBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    workflow_id: int = Field(foreign_key="workflow.id")
+    id: int | None = Field(default=None, primary_key=True)
+    workflow_id: int = Field(foreign_key='workflow.id')
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = None
-    
+    updated_at: datetime | None = None
+
     # Relationships
-    workflow: Optional["Workflow"] = Relationship(back_populates="steps")
+    workflow: Optional['Workflow'] = Relationship(back_populates='steps')
 
 
 class WorkflowStepCreate(WorkflowStepBase):
@@ -86,72 +86,72 @@ class WorkflowStepRead(WorkflowStepBase):
     id: int
     workflow_id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
 
 class WorkflowStepUpdate(SQLModel):
-    name: Optional[str] = None
-    type: Optional[str] = None
-    configuration: Optional[Dict[str, Any]] = None
-    position: Optional[int] = None
+    name: str | None = None
+    type: str | None = None
+    configuration: dict[str, Any] | None = None
+    position: int | None = None
 
 
 # Workflow Models
 class WorkflowBase(SQLModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     status: WorkflowStatus = WorkflowStatus.DRAFT
-    configuration: Dict[str, Any] = Field(default={}, sa_column=Column(JSON))
+    configuration: dict[str, Any] = Field(default={}, sa_column=Column(JSON))
 
 
 class Workflow(WorkflowBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id")
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key='user.id')
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = None
-    
+    updated_at: datetime | None = None
+
     # Relationships
-    user: Optional[User] = Relationship(back_populates="workflows")
-    steps: List[WorkflowStep] = Relationship(back_populates="workflow")
-    runs: List["WorkflowRun"] = Relationship(back_populates="workflow")
+    user: User | None = Relationship(back_populates='workflows')
+    steps: list[WorkflowStep] = Relationship(back_populates='workflow')
+    runs: list['WorkflowRun'] = Relationship(back_populates='workflow')
 
 
 class WorkflowCreate(WorkflowBase):
-    steps: List[WorkflowStepCreate] = []
+    steps: list[WorkflowStepCreate] = []
 
 
 class WorkflowRead(WorkflowBase):
     id: int
     user_id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None
-    steps: List[WorkflowStepRead] = []
+    updated_at: datetime | None = None
+    steps: list[WorkflowStepRead] = []
 
 
 class WorkflowUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[WorkflowStatus] = None
-    configuration: Optional[Dict[str, Any]] = None
+    name: str | None = None
+    description: str | None = None
+    status: WorkflowStatus | None = None
+    configuration: dict[str, Any] | None = None
 
 
 # Workflow Run Models
 class WorkflowRunBase(SQLModel):
     workflow_id: int
     status: RunStatus = RunStatus.PENDING
-    error_message: Optional[str] = None
-    logs: List[Dict[str, Any]] = Field(default=[], sa_column=Column(JSON))
+    error_message: str | None = None
+    logs: list[dict[str, Any]] = Field(default=[], sa_column=Column(JSON))
 
 
 class WorkflowRun(WorkflowRunBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    workflow_id: int = Field(foreign_key="workflow.id")
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    id: int | None = Field(default=None, primary_key=True)
+    workflow_id: int = Field(foreign_key='workflow.id')
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     # Relationships
-    workflow: Optional[Workflow] = Relationship(back_populates="runs")
+    workflow: Workflow | None = Relationship(back_populates='runs')
 
 
 class WorkflowRunCreate(SQLModel):
@@ -160,19 +160,19 @@ class WorkflowRunCreate(SQLModel):
 
 class WorkflowRunRead(WorkflowRunBase):
     id: int
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     created_at: datetime
 
 
 # Auth Models
 class Token(SQLModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str = 'bearer'
 
 
 class TokenPayload(SQLModel):
-    sub: Optional[int] = None
+    sub: int | None = None
 
 
 # ============================
@@ -181,19 +181,19 @@ class TokenPayload(SQLModel):
 
 
 class ComplianceScore(SQLModel, table=True):
-    __tablename__ = "compliance_scores"
+    __tablename__ = 'compliance_scores'
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(index=True)
     week_start: date
 
-    workout_compliance: Optional[Decimal] = Field(default=Decimal(0))
-    intensity_compliance: Optional[Decimal] = Field(default=Decimal(0))
-    recovery_compliance: Optional[Decimal] = Field(default=Decimal(0))
-    overall_compliance: Optional[Decimal] = Field(default=Decimal(0))
+    workout_compliance: Decimal | None = Field(default=Decimal(0))
+    intensity_compliance: Decimal | None = Field(default=Decimal(0))
+    recovery_compliance: Decimal | None = Field(default=Decimal(0))
+    overall_compliance: Decimal | None = Field(default=Decimal(0))
 
-    activities_prescribed: Optional[int] = Field(default=0)
-    activities_completed: Optional[int] = Field(default=0)
+    activities_prescribed: int | None = Field(default=0)
+    activities_completed: int | None = Field(default=0)
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -210,60 +210,60 @@ class TrainingPlanBase(SQLModel):
     weekly_distance_base: Decimal
     weekly_distance_peak: Decimal
     training_days_per_week: int
-    plan_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    plan_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
     is_active: bool = True
 
 
 class TrainingPlan(TrainingPlanBase, table=True):
-    __tablename__ = "training_plans"
+    __tablename__ = 'training_plans'
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships
-    prescribed_workouts: List["PrescribedWorkout"] = Relationship(back_populates="training_plan")
+    prescribed_workouts: list['PrescribedWorkout'] = Relationship(back_populates='training_plan')
 
 
 class PrescribedWorkoutBase(SQLModel):
-    training_plan_id: UUID = Field(foreign_key="training_plans.id")
+    training_plan_id: UUID = Field(foreign_key='training_plans.id')
     user_id: UUID
     workout_date: date
     workout_type: str
-    distance: Optional[Decimal] = None
-    duration_minutes: Optional[int] = None
-    intensity_zone: Optional[str] = None
-    rpe_target: Optional[int] = None
-    workout_description: Optional[str] = None
-    workout_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    distance: Decimal | None = None
+    duration_minutes: int | None = None
+    intensity_zone: str | None = None
+    rpe_target: int | None = None
+    workout_description: str | None = None
+    workout_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
     is_completed: bool = False
 
 
 class PrescribedWorkout(PrescribedWorkoutBase, table=True):
-    __tablename__ = "prescribed_workouts"
+    __tablename__ = 'prescribed_workouts'
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships
-    training_plan: Optional[TrainingPlan] = Relationship(back_populates="prescribed_workouts")
+    training_plan: TrainingPlan | None = Relationship(back_populates='prescribed_workouts')
 
 
 class Profile(SQLModel, table=True):
-    __tablename__ = "profiles"
+    __tablename__ = 'profiles'
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(unique=True, index=True)
-    email: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    email: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class StravaConnection(SQLModel, table=True):
-    __tablename__ = "strava_connections"
+    __tablename__ = 'strava_connections'
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(unique=True, index=True)
@@ -271,45 +271,45 @@ class StravaConnection(SQLModel, table=True):
     access_token: str
     refresh_token: str
     expires_at: datetime
-    athlete_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    athlete_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
     connected_at: datetime = Field(default_factory=datetime.utcnow)
-    last_sync: Optional[datetime] = None
+    last_sync: datetime | None = None
 
 
 class Subscriber(SQLModel, table=True):
-    __tablename__ = "subscribers"
+    __tablename__ = 'subscribers'
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(unique=True, index=True)
-    email: Optional[str] = None
-    stripe_customer_id: Optional[str] = None
-    subscribed: Optional[bool] = Field(default=False)
-    subscription_tier: Optional[str] = Field(default="free")
-    subscription_end: Optional[datetime] = None
-    stripe_subscription_id: Optional[str] = None
+    email: str | None = None
+    stripe_customer_id: str | None = None
+    subscribed: bool | None = Field(default=False)
+    subscription_tier: str | None = Field(default='free')
+    subscription_end: datetime | None = None
+    stripe_subscription_id: str | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class TrainingActivity(SQLModel, table=True):
-    __tablename__ = "training_activities"
+    __tablename__ = 'training_activities'
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(index=True)
-    strava_activity_id: Optional[str] = None
+    strava_activity_id: str | None = None
     name: str
     activity_type: str
-    prescribed_workout: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    actual_workout: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    compliance_score: Optional[Decimal] = None
-    distance: Optional[Decimal] = None
-    moving_time: Optional[int] = None
-    elapsed_time: Optional[int] = None
-    total_elevation_gain: Optional[Decimal] = None
+    prescribed_workout: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
+    actual_workout: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
+    compliance_score: Decimal | None = None
+    distance: Decimal | None = None
+    moving_time: int | None = None
+    elapsed_time: int | None = None
+    total_elevation_gain: Decimal | None = None
     start_date: datetime
-    average_heartrate: Optional[int] = None
-    max_heartrate: Optional[int] = None
-    rpe_prescribed: Optional[int] = None
-    rpe_actual: Optional[int] = None
-    activity_data: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    average_heartrate: int | None = None
+    max_heartrate: int | None = None
+    rpe_prescribed: int | None = None
+    rpe_actual: int | None = None
+    activity_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)

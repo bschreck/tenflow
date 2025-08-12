@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
@@ -10,7 +10,7 @@ from tenflow.models import User, UserCreate, UserRead, UserUpdate
 router = APIRouter()
 
 
-@router.post("/", response_model=UserRead)
+@router.post('/', response_model=UserRead)
 def create_user(
     *,
     session: Session = Depends(get_session_gen),
@@ -24,16 +24,16 @@ def create_user(
     if session.exec(statement).first():
         raise HTTPException(
             status_code=400,
-            detail="The user with this email already exists.",
+            detail='The user with this email already exists.',
         )
-    
+
     statement = select(User).where(User.username == user_in.username)
     if session.exec(statement).first():
         raise HTTPException(
             status_code=400,
-            detail="The user with this username already exists.",
+            detail='The user with this username already exists.',
         )
-    
+
     # Create user
     user = User(
         email=user_in.email,
@@ -49,7 +49,7 @@ def create_user(
     return user
 
 
-@router.get("/me", response_model=UserRead)
+@router.get('/me', response_model=UserRead)
 def read_user_me(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
@@ -59,7 +59,7 @@ def read_user_me(
     return current_user
 
 
-@router.put("/me", response_model=UserRead)
+@router.put('/me', response_model=UserRead)
 def update_user_me(
     *,
     session: Session = Depends(get_session_gen),
@@ -77,14 +77,14 @@ def update_user_me(
         current_user.full_name = user_in.full_name
     if user_in.password:
         current_user.hashed_password = security.get_password_hash(user_in.password)
-    
+
     session.add(current_user)
     session.commit()
     session.refresh(current_user)
     return current_user
 
 
-@router.get("/{user_id}", response_model=UserRead)
+@router.get('/{user_id}', response_model=UserRead)
 def read_user_by_id(
     user_id: int,
     current_user: User = Depends(get_current_active_user),
@@ -97,12 +97,12 @@ def read_user_by_id(
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="The user with this id does not exist.",
+            detail='The user with this id does not exist.',
         )
     return user
 
 
-@router.get("/", response_model=List[UserRead])
+@router.get('/', response_model=list[UserRead])
 def read_users(
     session: Session = Depends(get_session_gen),
     skip: int = 0,

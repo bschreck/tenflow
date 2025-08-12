@@ -104,14 +104,6 @@ test-backend-serial: ensure-dev-start-prereqs ## Run backend tests serially (one
 	cd backend && uv run pytest tests -n 0 $(PYTEST_ARGS)
 	docker compose down postgres
 
-format: ensure-dev-start-prereqs ## Format code
-	docker compose exec backend black app/
-	docker compose exec frontend npm run format
-
-lint: ensure-dev-start-prereqs ## Run linters
-	docker compose exec backend flake8 app/
-	docker compose exec frontend npm run lint
-
 rebuild: ensure-dev-start-prereqs ## Rebuild and start all services
 	docker compose up --build -d
 
@@ -136,3 +128,8 @@ modal-deploy:
 
 modal-migrate:
 	cd backend && MODAL_ENVIRONMENT=tenflow uv run modal run modal_deploy.py::run_migrations
+
+format:
+	cd backend && uv run ruff check --fix --output-format=github .
+	cd backend && uv run ruff format
+	cd frontend && npm run format && npx eslint . --fix

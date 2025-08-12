@@ -1,28 +1,35 @@
-import { useState } from 'react'
-import { useAuthStore } from '@/stores/auth'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { User, Key, Bell, Shield } from 'lucide-react'
+import { User, Key, Bell, Shield } from "lucide-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuthStore } from "@/stores/auth";
 
 export default function SettingsPage() {
-  const { user } = useAuthStore()
+  const { user } = useAuthStore();
   const [profileData, setProfileData] = useState({
-    email: user?.email || '',
-    username: user?.username || '',
-    full_name: user?.full_name || '',
-  })
+    email: user?.email || "",
+    username: user?.username || "",
+    full_name: user?.full_name || "",
+  });
 
   const handleProfileUpdate = async () => {
     // TODO: Implement profile update
-    alert('Profile update functionality coming soon!')
-  }
+    alert("Profile update functionality coming soon!");
+  };
 
   const handlePasswordChange = async () => {
     // TODO: Implement password change
-    alert('Password change functionality coming soon!')
-  }
+    alert("Password change functionality coming soon!");
+  };
 
   return (
     <div className="space-y-8">
@@ -41,9 +48,7 @@ export default function SettingsPage() {
               <User className="h-5 w-5" />
               <CardTitle>Profile</CardTitle>
             </div>
-            <CardDescription>
-              Update your personal information
-            </CardDescription>
+            <CardDescription>Update your personal information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -53,7 +58,9 @@ export default function SettingsPage() {
                   id="email"
                   type="email"
                   value={profileData.email}
-                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, email: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -61,7 +68,9 @@ export default function SettingsPage() {
                 <Input
                   id="username"
                   value={profileData.username}
-                  onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, username: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -70,12 +79,12 @@ export default function SettingsPage() {
               <Input
                 id="full_name"
                 value={profileData.full_name}
-                onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                onChange={(e) =>
+                  setProfileData({ ...profileData, full_name: e.target.value })
+                }
               />
             </div>
-            <Button onClick={handleProfileUpdate}>
-              Save Changes
-            </Button>
+            <Button onClick={handleProfileUpdate}>Save Changes</Button>
           </CardContent>
         </Card>
 
@@ -117,9 +126,7 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
-            <Button onClick={handlePasswordChange}>
-              Change Password
-            </Button>
+            <Button onClick={handlePasswordChange}>Change Password</Button>
           </CardContent>
         </Card>
 
@@ -157,13 +164,13 @@ export default function SettingsPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Account Type</span>
                 <span className="font-medium">
-                  {user?.is_superuser ? 'Administrator' : 'Standard User'}
+                  {user?.is_superuser ? "Administrator" : "Standard User"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Account Status</span>
                 <span className="font-medium">
-                  {user?.is_active ? 'Active' : 'Inactive'}
+                  {user?.is_active ? "Active" : "Inactive"}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -175,5 +182,5 @@ export default function SettingsPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

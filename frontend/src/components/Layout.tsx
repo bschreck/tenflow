@@ -1,37 +1,35 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
-import { useAuthStore } from '@/stores/auth'
-import { Button } from '@/components/ui/button'
-import { 
-  Home, 
-  Workflow, 
-  Settings, 
-  LogOut,
-  Menu,
-  X,
-  Zap
-} from 'lucide-react'
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
+import { Home, Workflow, Settings, LogOut, Menu, X, Zap } from "lucide-react";
+import { useState } from "react";
+import { Outlet, Link, useLocation } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth";
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Workflows', href: '/workflows', icon: Workflow },
-  { name: 'Settings', href: '/settings', icon: Settings },
-]
+  { name: "Dashboard", href: "/", icon: Home },
+  { name: "Workflows", href: "/workflows", icon: Workflow },
+  { name: "Settings", href: "/settings", icon: Settings },
+];
 
 export default function Layout() {
-  const location = useLocation()
-  const { user, logout } = useAuthStore()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const location = useLocation();
+  const { user, logout } = useAuthStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile sidebar */}
-      <div className={cn(
-        "fixed inset-0 z-50 lg:hidden",
-        sidebarOpen ? "block" : "hidden"
-      )}>
-        <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+      <div
+        className={cn(
+          "fixed inset-0 z-50 lg:hidden",
+          sidebarOpen ? "block" : "hidden",
+        )}
+      >
+        <div
+          className="fixed inset-0 bg-black/50"
+          onClick={() => setSidebarOpen(false)}
+        />
         <div className="fixed inset-y-0 left-0 w-64 bg-card border-r">
           <div className="flex h-16 items-center justify-between px-6">
             <div className="flex items-center space-x-2">
@@ -48,7 +46,7 @@ export default function Layout() {
           </div>
           <nav className="mt-8 px-4">
             {navigation.map((item) => {
-              const Icon = item.icon
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.name}
@@ -57,14 +55,14 @@ export default function Layout() {
                     "flex items-center space-x-3 px-3 py-2 rounded-lg mb-1 transition-colors",
                     location.pathname === item.href
                       ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent"
+                      : "hover:bg-accent",
                   )}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.name}</span>
                 </Link>
-              )
+              );
             })}
           </nav>
         </div>
@@ -81,7 +79,7 @@ export default function Layout() {
           </div>
           <nav className="flex-1 mt-8 px-4">
             {navigation.map((item) => {
-              const Icon = item.icon
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.name}
@@ -90,13 +88,13 @@ export default function Layout() {
                     "flex items-center space-x-3 px-3 py-2 rounded-lg mb-1 transition-colors",
                     location.pathname === item.href
                       ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent"
+                      : "hover:bg-accent",
                   )}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.name}</span>
                 </Link>
-              )
+              );
             })}
           </nav>
           <div className="p-4 border-t">
@@ -112,11 +110,7 @@ export default function Layout() {
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={logout}
-              >
+              <Button variant="ghost" size="icon" onClick={logout}>
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -142,5 +136,5 @@ export default function Layout() {
         </main>
       </div>
     </div>
-  )
+  );
 }
