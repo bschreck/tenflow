@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { workflowsAPI } from "@/lib/api";
-import type { Workflow } from "@/lib/types";
+import type { Workflow } from "@/types";
 
 export default function WorkflowsPage() {
   const [searchTerm, setSearchTerm] = useState("");

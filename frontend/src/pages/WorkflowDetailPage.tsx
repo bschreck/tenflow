@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { workflowsAPI } from "@/lib/api";
-import { WorkflowStep, WorkflowRun } from "@/lib/types";
+import { WorkflowStep, WorkflowRun } from "@/types";
 
 export default function WorkflowDetailPage() {
   const { id } = useParams<{ id: string }>();

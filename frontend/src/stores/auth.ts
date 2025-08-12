@@ -1,15 +1,7 @@
 import { create } from "zustand";
 
 import { authAPI } from "@/lib/api";
-
-interface User {
-  id: number;
-  email: string;
-  username: string;
-  full_name?: string;
-  is_active: boolean;
-  is_superuser: boolean;
-}
+import type { User } from "@/types";
 
 interface AuthState {
   user: User | null;

@@ -23,7 +23,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { workflowsAPI } from "@/lib/api";
-import { WorkflowStep, UpdateWorkflowRequest } from "@/lib/types";
+import { UpdateWorkflowRequest } from "@/types";
+
+// Local step type for UI state (before saving)
+interface LocalWorkflowStep {
+  id?: number;
+  name: string;
+  type: string;
+  configuration: Record<string, unknown>;
+}
 
 const stepTypes = [
   {
@@ -60,7 +68,7 @@ export default function WorkflowBuilderPage() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [steps, setSteps] = useState<WorkflowStep[]>([]);
+  const [steps, setSteps] = useState<LocalWorkflowStep[]>([]);
 
   const { data: workflow } = useQuery({
     queryKey: ["workflow", workflowId],
@@ -72,7 +80,14 @@ export default function WorkflowBuilderPage() {
     if (workflow) {
       setName(workflow.name);
       setDescription(workflow.description || "");
-      setSteps(workflow.steps || []);
+      setSteps(
+        workflow.steps?.map((step) => ({
+          id: step.id,
+          name: step.name,
+          type: step.type,
+          configuration: step.configuration,
+        })) || [],
+      );
     }
   }, [workflow]);
 
@@ -96,11 +111,12 @@ export default function WorkflowBuilderPage() {
       name,
       description,
       status: "draft" as const,
+      configuration: {},
       steps: steps.map((step, index) => ({
         name: step.name,
         type: step.type,
         position: index,
-        configuration: {},
+        configuration: step.configuration,
       })),
     };
 
@@ -125,7 +141,7 @@ export default function WorkflowBuilderPage() {
     setSteps(steps.filter((_, i) => i !== index));
   };
 
-  const updateStep = (index: number, updates: Partial<WorkflowStep>) => {
+  const updateStep = (index: number, updates: Partial<LocalWorkflowStep>) => {
     const newSteps = [...steps];
     newSteps[index] = { ...newSteps[index], ...updates };
     setSteps(newSteps);

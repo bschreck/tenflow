@@ -7,7 +7,7 @@ import type {
   RegisterRequest,
   User,
   WorkflowRun,
-} from "./types";
+} from "@/types";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 const API_BASE_URL = backendUrl.replace(/\/$/, "") + "/api/v1";

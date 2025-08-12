@@ -133,3 +133,6 @@ format:
 	cd backend && uv run ruff check --fix --output-format=github .
 	cd backend && uv run ruff format
 	cd frontend && npm run format && npx eslint . --fix
+
+sync-model-types:
+	cd backend && uv run python scripts/generate_typescript_types.py

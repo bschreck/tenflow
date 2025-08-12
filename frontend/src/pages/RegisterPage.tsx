@@ -47,7 +47,9 @@ export default function RegisterPage() {
         email: formData.email,
         username: formData.username,
         password: formData.password,
-        full_name: formData.full_name || undefined,
+        full_name: formData.full_name || null,
+        is_active: true,
+        is_superuser: false,
       });
       navigate("/login");
     } catch (err: unknown) {
