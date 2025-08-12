@@ -10,16 +10,15 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
 
-# Set up CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=settings.get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API router
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
@@ -31,7 +30,3 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
-
-
-# Export for Vercel
-handler = app

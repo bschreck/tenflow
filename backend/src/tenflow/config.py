@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    FRONTEND_URL: str = "http://localhost:5173"
+    ALLOWED_ORIGINS: str = "http://localhost:5173"
     
     # App
     APP_NAME: str = "Tenflow"
@@ -31,6 +31,13 @@ class Settings(BaseSettings):
     
     def get_root_postgres_url(self):
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/postgres"
+
+    def get_allowed_origins(self):
+        if self.ALLOWED_ORIGINS:
+            origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
+            return origins
+        else:
+            return [self.FRONTEND_URL]
 
 
 settings = Settings()
