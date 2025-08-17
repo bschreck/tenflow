@@ -250,18 +250,21 @@ export const FitnessStep = ({ stepper }: FitnessStepProps) => {
         </div>
       </Card>
 
-      {/* Complete Assessment Button */}
-      <div className="pt-6">
+      <div className="flex space-x-4 pt-4">
+        <Button 
+          variant="outline" 
+          onClick={() => stepper.prev()}
+          className="flex-1"
+        >
+          Back
+        </Button>
         <Button 
           onClick={() => stepper.next()}
           disabled={!isAllSectionsComplete()}
-          className={`w-full py-3 text-base font-medium transition-all duration-200 ${
-            isAllSectionsComplete() 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
+          variant='default'
+          className='flex-1'
         >
-          {isAllSectionsComplete() ? 'Complete assessment' : 'Please complete all sections above'}
+          Complete assessment
         </Button>
       </div>
     </div>
