@@ -1,4 +1,4 @@
-import { Home, Workflow, Settings, LogOut, Menu, X, Zap } from "lucide-react";
+import { Home, Settings, LogOut, Menu, X, Zap } from "lucide-react";
 import { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 
@@ -8,7 +8,6 @@ import { useAuthStore } from "@/stores/auth";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
-  { name: "Workflows", href: "/workflows", icon: Workflow },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
