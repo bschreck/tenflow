@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import { OnboardingFormContextType } from "@/types";
 import { usePersistedOnboardingForm } from "@/hooks/usePersistedOnboardingForm";
+import { useTrainingProgressionCache } from "@/hooks/useTrainingProgressionCache";
 
 const OnboardingFormContext = createContext<OnboardingFormContextType | null>(null);
 
@@ -18,6 +19,7 @@ interface OnboardingFormProviderProps {
 
 export const OnboardingFormProvider = ({ children }: OnboardingFormProviderProps) => {
   const { formData, updateFormData, clearFormData } = usePersistedOnboardingForm();
+  const { clearCache } = useTrainingProgressionCache();
 
   const submitForm = async () => {
     try {
@@ -39,8 +41,9 @@ export const OnboardingFormProvider = ({ children }: OnboardingFormProviderProps
       const result = await response.json();
       console.log('Form submitted successfully:', result);
       
-      // Clear the persisted data after successful submission
+      // Clear the persisted data and training progression cache after successful submission
       clearFormData();
+      clearCache();
     } catch (error) {
       console.error('Error submitting form:', error);
       throw error;

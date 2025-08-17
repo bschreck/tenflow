@@ -1,43 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useOnboardingForm } from '@/components/onboarding/OnboardingFormProvider';
-import { submitOnboardingData, getTrainingProgression } from '@/lib/api';
-import type { TrainingProgression } from '@/types';
+import { useTrainingProgression } from '@/hooks/useTrainingProgression';
+import { submitOnboardingData } from '@/lib/api';
 
 export default function TrainingPlanSummary() {
   const navigate = useNavigate();
   const { formData } = useOnboardingForm();
-  const [trainingProgression, setTrainingProgression] = useState<TrainingProgression | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch training progression on component mount
-  useEffect(() => {
-    const fetchProgression = async () => {
-      try {
-        setIsLoading(true);
-        const progression = await getTrainingProgression(formData);
-        setTrainingProgression(progression);
-      } catch (error) {
-        console.error('Error fetching training progression:', error);
-        // Use fallback values if API fails
-        setTrainingProgression({
-          programDuration: 12,
-          intensityLevel: 'Moderate',
-          currentWeeklyHours: 5,
-          peakWeeklyHours: 13,
-          trainingDaysPerWeek: 4,
-          weeklyIncrease: 1
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProgression();
-  }, [formData]);
+  // Use the cached training progression hook
+  const { trainingProgression, isLoading, error } = useTrainingProgression(formData);
 
   const handleStartTraining = async () => {
     try {
@@ -73,6 +48,30 @@ export default function TrainingPlanSummary() {
             <div className="text-center space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
               <p className="text-gray-600">Creating your personalized training plan...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there was a problem fetching data
+  if (error && !trainingProgression) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center space-y-4">
+              <div className="text-red-500 mb-4">
+                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to Generate Plan</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
             </div>
           </div>
         </div>

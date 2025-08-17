@@ -25,7 +25,7 @@ export default function DashboardPage() {
         />
 
         {/* Overlay gradient for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/40 to-black/20" />
 
         {/* Content */}
         <div className="relative px-6 sm:px-10 py-16 sm:py-20 lg:py-24 text-white">

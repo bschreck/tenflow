@@ -85,7 +85,7 @@ function OnboardingPageContent() {
               </li>
               {index < array.length - 1 && (
                 <Separator
-                  className={`w-4 h-[1px] ${
+                  className={`w-4 h-px ${
                     index < currentIndex ? 'bg-primary' : 'bg-muted'
                   }`}
                 />
