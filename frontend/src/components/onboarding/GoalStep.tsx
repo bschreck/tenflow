@@ -57,7 +57,8 @@ const goalOptions: RaceOption[] = [
     description: "Enter the world of ultramarathons",
     participantCount: 1200,
     badge: "Ultra",
-    category: "goal"
+    category: "goal",
+    elevationGain: 1500
   },
   {
     id: "100k-ultra",
@@ -66,7 +67,8 @@ const goalOptions: RaceOption[] = [
     description: "Serious ultra distance",
     participantCount: 400,
     badge: "Elite",
-    category: "goal"
+    category: "goal",
+    elevationGain: 3200
   }
 ];
 
@@ -81,7 +83,8 @@ const calendarRaces: RaceOption[] = [
     badge: "Elite",
     location: "Chamonix, France",
     date: "Aug 2024",
-    category: "race"
+    category: "race",
+    elevationGain: 10000
   },
   {
     id: "western-states",
@@ -92,7 +95,8 @@ const calendarRaces: RaceOption[] = [
     badge: "Elite",
     location: "California, USA",
     date: "Jun 2024",
-    category: "race"
+    category: "race",
+    elevationGain: 5500
   },
   {
     id: "hardrock",
@@ -103,7 +107,8 @@ const calendarRaces: RaceOption[] = [
     badge: "Elite",
     location: "Colorado, USA", 
     date: "Jul 2024",
-    category: "race"
+    category: "race",
+    elevationGain: 10200
   },
   {
     id: "tor-des-geants",
@@ -114,7 +119,8 @@ const calendarRaces: RaceOption[] = [
     badge: "Elite",
     location: "Aosta Valley, Italy",
     date: "Sep 2024",
-    category: "race"
+    category: "race",
+    elevationGain: 24000
   }
 ];
 
@@ -146,6 +152,12 @@ export const GoalStep = ({ stepper }: GoalStepProps) => {
     });
     // Automatically advance to next step
     stepper.next();
+  };
+
+  const handleContinue = () => {
+    if (selectedRaceId) {
+      stepper.next();
+    }
   };
 
   const handleBrowseRaceCalendar = () => {
@@ -204,10 +216,12 @@ export const GoalStep = ({ stepper }: GoalStepProps) => {
                           <Users className="w-3 h-3" />
                           <span>{race.participantCount.toLocaleString()} entrants</span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Target className="w-3 h-3" />
-                          <span>+{Math.floor(Math.random() * 5000 + 1000)}m gain</span>
-                        </div>
+                        {race.elevationGain && (
+                          <div className="flex items-center space-x-1">
+                            <Target className="w-3 h-3" />
+                            <span>+{race.elevationGain.toLocaleString()}m gain</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -222,12 +236,24 @@ export const GoalStep = ({ stepper }: GoalStepProps) => {
           ))}
         </div>
 
-        {/* Back to distance goals button */}
-        <div className="text-center pt-4">
+        {/* Continue and Back buttons */}
+        <div className="flex flex-col space-y-3 pt-6">
+          <Button 
+            onClick={handleContinue}
+            disabled={!selectedRaceId}
+            className={`w-full text-white disabled:opacity-50 transition-all duration-200 ${
+              selectedRaceId 
+                ? 'bg-gray-900 hover:bg-gray-800 shadow-lg' 
+                : 'bg-gray-400 cursor-not-allowed'
+            }`}
+          >
+            {selectedRaceId ? 'Continue' : 'Select a race to continue'}
+          </Button>
+
           <Button 
             variant="outline" 
             onClick={handleBackToGoals}
-            className="text-gray-600 hover:text-gray-800"
+            className="w-full text-gray-600 hover:text-gray-800"
           >
             Choose a distance goal instead
           </Button>
@@ -289,10 +315,12 @@ export const GoalStep = ({ stepper }: GoalStepProps) => {
                         <Users className="w-3 h-3" />
                         <span>{race.participantCount.toLocaleString()} runners</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Target className="w-3 h-3" />
-                        <span>+{Math.floor(Math.random() * 500 + 100)}m gain</span>
-                      </div>
+                      {race.elevationGain && (
+                        <div className="flex items-center space-x-1">
+                          <Target className="w-3 h-3" />
+                          <span>+{race.elevationGain.toLocaleString()}m gain</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -329,6 +357,22 @@ export const GoalStep = ({ stepper }: GoalStepProps) => {
             Browse Race Calendar
           </Button>
         </div>
+      </div>
+
+      {/* Continue button */}
+      <div className="pt-6">
+        <Button 
+          onClick={handleContinue}
+          disabled={!selectedRaceId}
+          className={`w-full text-white disabled:opacity-50 transition-all duration-200 ${
+            selectedRaceId 
+              ? 'bg-gray-900 hover:bg-gray-800 shadow-lg' 
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
+        >
+          {selectedRaceId ? 'Continue' : 'Select a goal to continue'}
+        </Button>
+
       </div>
     </div>
   );

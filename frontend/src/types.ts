@@ -57,4 +57,5 @@ export interface RaceOption {
   location?: string;
   date?: string;
   category: 'goal' | 'race';
+  elevationGain?: number;
 }
