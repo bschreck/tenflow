@@ -173,8 +173,6 @@ export interface components {
         UserCreate: {
             /** Email */
             email: string;
-            /** Username */
-            username: string;
             /** Full Name */
             full_name?: string | null;
             /**
@@ -194,8 +192,6 @@ export interface components {
         UserRead: {
             /** Email */
             email: string;
-            /** Username */
-            username: string;
             /** Full Name */
             full_name?: string | null;
             /**
@@ -222,8 +218,6 @@ export interface components {
         UserUpdate: {
             /** Email */
             email?: string | null;
-            /** Username */
-            username?: string | null;
             /** Full Name */
             full_name?: string | null;
             /** Password */

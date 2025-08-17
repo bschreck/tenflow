@@ -27,17 +27,9 @@ def create_user(
             detail='The user with this email already exists.',
         )
 
-    statement = select(User).where(User.username == user_in.username)
-    if session.exec(statement).first():
-        raise HTTPException(
-            status_code=400,
-            detail='The user with this username already exists.',
-        )
-
     # Create user
     user = User(
         email=user_in.email,
-        username=user_in.username,
         full_name=user_in.full_name,
         hashed_password=security.get_password_hash(user_in.password),
         is_active=user_in.is_active,
@@ -71,8 +63,6 @@ def update_user_me(
     """
     if user_in.email:
         current_user.email = user_in.email
-    if user_in.username:
-        current_user.username = user_in.username
     if user_in.full_name is not None:
         current_user.full_name = user_in.full_name
     if user_in.password:

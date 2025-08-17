@@ -101,12 +101,11 @@ export default function Layout() {
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-medium">
-                    {user?.username?.charAt(0).toUpperCase()}
+                    {user?.email?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{user?.username}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  <p className="text-sm font-medium">{user?.email}</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" onClick={logout}>

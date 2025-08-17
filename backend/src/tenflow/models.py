@@ -9,7 +9,6 @@ import enum
 # User Models
 class UserBase(SQLModel):
     email: str = Field(unique=True, index=True)
-    username: str = Field(unique=True, index=True)
     full_name: str | None = None
     is_active: bool = True
     is_superuser: bool = False
@@ -34,7 +33,6 @@ class UserRead(UserBase):
 
 class UserUpdate(SQLModel):
     email: str | None = None
-    username: str | None = None
     full_name: str | None = None
     password: str | None = None
     is_active: bool | None = None

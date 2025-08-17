@@ -17,7 +17,6 @@ export default function SettingsPage() {
   const { user } = useAuthStore();
   const [profileData, setProfileData] = useState({
     email: user?.email || "",
-    username: user?.username || "",
     full_name: user?.full_name || "",
   });
 
@@ -60,16 +59,6 @@ export default function SettingsPage() {
                   value={profileData.email}
                   onChange={(e) =>
                     setProfileData({ ...profileData, email: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={profileData.username}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, username: e.target.value })
                   }
                 />
               </div>

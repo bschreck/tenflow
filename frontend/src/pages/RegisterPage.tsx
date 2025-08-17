@@ -19,7 +19,6 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
-    username: "",
     password: "",
     confirmPassword: "",
     full_name: "",
@@ -45,7 +44,6 @@ export default function RegisterPage() {
     try {
       await authAPI.register({
         email: formData.email,
-        username: formData.username,
         password: formData.password,
         full_name: formData.full_name || null,
         is_active: true,
@@ -97,19 +95,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                placeholder="Choose a username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name (optional)</Label>
+              <Label htmlFor="full_name">Full Name</Label>
               <Input
                 id="full_name"
                 name="full_name"
@@ -117,6 +103,7 @@ export default function RegisterPage() {
                 placeholder="Enter your full name"
                 value={formData.full_name}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="space-y-2">

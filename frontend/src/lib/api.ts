@@ -47,9 +47,9 @@ export default api;
 
 // Auth API
 export const authAPI = {
-  login: async (username: string, password: string): Promise<AuthResponse> => {
+  login: async (email: string, password: string): Promise<AuthResponse> => {
     const formData = new FormData();
-    formData.append("username", username);
+    formData.append("username", email);
     formData.append("password", password);
 
     const response = await api.post<AuthResponse>("/auth/login", formData, {
@@ -57,7 +57,6 @@ export const authAPI = {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log("response", response);
     return response.data;
   },
 
