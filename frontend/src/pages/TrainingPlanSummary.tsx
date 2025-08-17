@@ -4,17 +4,25 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useOnboardingForm } from '@/components/onboarding/OnboardingFormProvider';
 import { useTrainingProgression } from '@/hooks/useTrainingProgression';
+import { useAuthStore } from '@/stores/auth';
 import { submitOnboardingData } from '@/lib/api';
 
 export default function TrainingPlanSummary() {
   const navigate = useNavigate();
   const { formData } = useOnboardingForm();
+  const { isAuthenticated } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use the cached training progression hook
   const { trainingProgression, isLoading, error } = useTrainingProgression(formData);
 
   const handleStartTraining = async () => {
+    // If user is not authenticated, redirect to register page first
+    if (!isAuthenticated) {
+      navigate('/register');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       // Submit the onboarding data
@@ -207,9 +215,17 @@ export default function TrainingPlanSummary() {
 
           {/* Next Steps Card */}
           <Card className="p-6 border border-gray-200 rounded-xl bg-gray-50">
-            <h3 className="font-semibold text-gray-900 mb-2">Next: Complete Your Daily Readiness Check</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">
+              {isAuthenticated 
+                ? "Next: Complete Your Daily Readiness Check" 
+                : "Next: Create Your Account to Get Started"
+              }
+            </h3>
             <p className="text-gray-600 text-sm">
-              We'll assess how you're feeling today to customize your first workout
+              {isAuthenticated 
+                ? "We'll assess how you're feeling today to customize your first workout"
+                : "Create your account to save your plan and start your personalized training journey"
+              }
             </p>
           </Card>
         </div>
@@ -239,7 +255,7 @@ export default function TrainingPlanSummary() {
               </>
             ) : (
               <>
-                Start Training
+                {isAuthenticated ? "Start Training" : "Create Account"}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

@@ -46,10 +46,15 @@ function App() {
           element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/" />}
         />
 
+        {/* Dashboard route - accessible to everyone */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<DashboardPage />} />
+        </Route>
+
+        {/* Authenticated routes */}
         <Route
           element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}
         >
-          <Route path="/" element={<DashboardPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 

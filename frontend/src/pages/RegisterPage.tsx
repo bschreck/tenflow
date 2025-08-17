@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authAPI } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { registerAndLogin } = useAuthStore();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -42,14 +43,8 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await authAPI.register({
-        email: formData.email,
-        password: formData.password,
-        full_name: formData.full_name || null,
-        is_active: true,
-        is_superuser: false,
-      });
-      navigate("/login");
+      await registerAndLogin(formData.email, formData.password, formData.full_name);
+      navigate("/");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { detail?: string } } };
       setError(error.response?.data?.detail || "Registration failed");
