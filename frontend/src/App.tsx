@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
-} from "react-router-dom";
+} from "react-router";
 
 import Layout from "@/components/Layout";
 import DashboardPage from "@/pages/DashboardPage";
@@ -12,7 +12,12 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import SettingsPage from "@/pages/SettingsPage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import TrainingPlanSummary from "@/pages/TrainingPlanSummary";
+import DailyReadinessCheck from "@/pages/DailyReadinessCheck";
+import { OnboardingFormProvider } from "@/components/onboarding/OnboardingFormProvider";
 import { useAuthStore } from "@/stores/auth";
+
+
 
 function App() {
   const { isAuthenticated, isLoading, fetchUser } = useAuthStore();
@@ -29,7 +34,7 @@ function App() {
     );
   }
 
-  return (
+    return (
     <Router>
       <Routes>
         <Route
@@ -48,8 +53,26 @@ function App() {
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
-        {/* New fitness app routes - no auth required for demo */}
-        <Route path="/onboarding" element={<OnboardingPage />} />
+        {/* Onboarding flow routes with shared form context */}
+        <Route 
+          path="/onboarding" 
+          element={
+            <OnboardingFormProvider>
+              <OnboardingPage />
+            </OnboardingFormProvider>
+          } 
+        />
+        <Route 
+          path="/training-plan-summary" 
+          element={
+            <OnboardingFormProvider>
+              <TrainingPlanSummary />
+            </OnboardingFormProvider>
+          } 
+        />
+        
+        {/* Standalone routes */}
+        <Route path="/daily-readiness-check" element={<DailyReadinessCheck />} />
       </Routes>
     </Router>
   );

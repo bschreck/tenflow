@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from "react";
-import { OnboardingFormData, OnboardingFormContextType } from "@/types";
+import { createContext, useContext } from "react";
+import { OnboardingFormContextType } from "@/types";
+import { usePersistedOnboardingForm } from "@/hooks/usePersistedOnboardingForm";
 
 const OnboardingFormContext = createContext<OnboardingFormContextType | null>(null);
 
@@ -16,11 +17,7 @@ interface OnboardingFormProviderProps {
 }
 
 export const OnboardingFormProvider = ({ children }: OnboardingFormProviderProps) => {
-  const [formData, setFormData] = useState<OnboardingFormData>({});
-
-  const updateFormData = (data: Partial<OnboardingFormData>) => {
-    setFormData(prev => ({ ...prev, ...data }));
-  };
+  const { formData, updateFormData, clearFormData } = usePersistedOnboardingForm();
 
   const submitForm = async () => {
     try {
@@ -41,6 +38,9 @@ export const OnboardingFormProvider = ({ children }: OnboardingFormProviderProps
 
       const result = await response.json();
       console.log('Form submitted successfully:', result);
+      
+      // Clear the persisted data after successful submission
+      clearFormData();
     } catch (error) {
       console.error('Error submitting form:', error);
       throw error;

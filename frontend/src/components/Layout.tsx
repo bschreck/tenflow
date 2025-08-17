@@ -1,6 +1,6 @@
 import { Home, Workflow, Settings, LogOut, Menu, X, Zap } from "lucide-react";
 import { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

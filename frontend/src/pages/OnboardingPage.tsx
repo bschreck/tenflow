@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from '@/components/ui/separator';
 import { BottomNavigation } from "@/components/ui/bottom-navigation";
 import * as React from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { defineStepper } from "@/components/stepper";
 import { 
-  OnboardingFormProvider, 
   GoalStep, 
   FitnessStep, 
   ConnectStep 
@@ -32,6 +32,26 @@ const { Stepper, useStepper, steps, utils } = defineStepper(
 
 function OnboardingPageContent() {
   const stepper = useStepper();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const processedStateRef = React.useRef<string | null>(null);
+  
+  // Check if we need to navigate to a specific step (e.g., when returning from training plan summary)
+  React.useEffect(() => {
+    const targetStep = location.state?.step;
+    const locationKey = location.key || 'default';
+    
+    // Only process if we haven't processed this specific location state before
+    if (targetStep && targetStep !== stepper.current.id && processedStateRef.current !== locationKey) {
+      stepper.goTo(targetStep);
+      processedStateRef.current = locationKey;
+      
+      // Clear the location state by replacing the current history entry
+      setTimeout(() => {
+        navigate('/onboarding', { replace: true });
+      }, 100);
+    }
+  }, [location.state, location.key, stepper, navigate]);
 
   const currentIndex = utils.getIndex(stepper.current.id);
 
@@ -45,7 +65,7 @@ function OnboardingPageContent() {
         >
           {stepper.all.map((step, index, array) => (
             <React.Fragment key={step.id}>
-              <li className="flex items-center gap-2 flex-shrink-0">
+              <li className="flex items-center gap-2 shrink-0">
                 <Button
                   type="button"
                   role="tab"
@@ -56,7 +76,7 @@ function OnboardingPageContent() {
                   aria-posinset={index + 1}
                   aria-setsize={steps.length}
                   aria-selected={stepper.current.id === step.id}
-                  className="flex size-10 items-center justify-center rounded-full flex-shrink-0"
+                  className="flex size-10 items-center justify-center rounded-full shrink-0"
                   onClick={() => stepper.goTo(step.id)}
                 >
                   {index + 1}
@@ -148,9 +168,7 @@ function OnboardingPageContent() {
 export default function OnboardingPage() {
   return (
     <Stepper.Provider>
-      <OnboardingFormProvider>
-        <OnboardingPageContent />
-      </OnboardingFormProvider>
+      <OnboardingPageContent />
     </Stepper.Provider>
   );
 }

@@ -13,6 +13,16 @@ export type UserUpdate = components["schemas"]["UserUpdate"];
 // Request types for forms/API calls
 export type RegisterRequest = components["schemas"]["UserCreate"];
 
+// Training Progression types
+export interface TrainingProgression {
+  programDuration: number; // weeks
+  intensityLevel: string;
+  currentWeeklyHours: number;
+  peakWeeklyHours: number;
+  trainingDaysPerWeek: number;
+  weeklyIncrease: number; // hours
+}
+
 // Onboarding types
 export interface OnboardingFormData {
   selectedGoal?: {

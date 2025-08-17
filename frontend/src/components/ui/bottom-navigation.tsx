@@ -7,7 +7,6 @@ interface BottomNavigationProps {
 }
 
 export const BottomNavigation = ({ 
-  currentStep = 1, 
   totalSteps = 4, 
   completedSteps = 1,
   showProgress = true,

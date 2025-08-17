@@ -3,6 +3,8 @@ import type {
   AuthResponse,
   RegisterRequest,
   User,
+  OnboardingFormData,
+  TrainingProgression,
 } from "@/types";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
@@ -68,4 +70,77 @@ export const authAPI = {
     const response = await api.get<User>("/users/me");
     return response.data;
   },
+};
+
+// Onboarding API
+export const submitOnboardingData = async (data: OnboardingFormData): Promise<void> => {
+  // TODO: Implement actual API call when backend endpoint is ready
+  console.log('Submitting onboarding data:', data);
+  
+  // For now, just log the data and resolve
+  // Future implementation:
+  // const response = await api.post("/onboarding", data);
+  // return response.data;
+};
+
+export const getTrainingProgression = async (formData: OnboardingFormData): Promise<TrainingProgression> => {
+  // TODO: Implement actual API call when backend endpoint is ready
+  console.log('Fetching training progression for:', formData);
+  
+  // Mock data based on user's selections - this would come from the backend
+  const goalData = formData.selectedGoal;
+  const fitnessData = formData.fitnessData;
+  
+  // Calculate mock progression data
+  let programDuration = 12; // default weeks
+  let intensityLevel = 'Moderate';
+  
+  // Duration based on goal
+  if (goalData?.distance.includes('100') || goalData?.distance.includes('200')) {
+    programDuration = 40;
+  } else if (goalData?.distance.includes('50')) {
+    programDuration = 24;
+  } else if (goalData?.distance.toLowerCase().includes('marathon')) {
+    programDuration = 16;
+  }
+  
+  // Intensity based on fitness level
+  switch (fitnessData?.fitnessLevel) {
+    case 'beginner':
+      intensityLevel = 'Easy';
+      break;
+    case 'recreational':
+      intensityLevel = 'Moderate';
+      break;
+    case 'competitive':
+      intensityLevel = 'High';
+      break;
+    case 'elite':
+      intensityLevel = 'Elite Intensity';
+      break;
+    default:
+      intensityLevel = 'Moderate';
+  }
+  
+  const currentWeeklyHours = fitnessData?.weeklyHours || 5;
+  const peakWeeklyHours = Math.round(currentWeeklyHours * 2.6); // Slightly higher multiplier
+  const trainingDaysPerWeek = fitnessData?.trainingDays || 4;
+  const weeklyIncrease = Math.max(1, Math.round((peakWeeklyHours - currentWeeklyHours) / (programDuration * 0.6))); // Progressive increase
+  
+  const mockProgression: TrainingProgression = {
+    programDuration,
+    intensityLevel,
+    currentWeeklyHours,
+    peakWeeklyHours,
+    trainingDaysPerWeek,
+    weeklyIncrease
+  };
+  
+  console.log('Generated training progression:', mockProgression);
+  
+  // Future implementation:
+  // const response = await api.post("/training/progression", formData);
+  // return response.data;
+  
+  return mockProgression;
 };

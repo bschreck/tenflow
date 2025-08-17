@@ -25,11 +25,11 @@ export const FitnessStep = ({ stepper }: FitnessStepProps) => {
     });
   };
 
-  const injuryHistoryRef = useRef<HTMLDivElement>(null);
-  const fitnessLevelRef = useRef<HTMLDivElement>(null);
-  const trainingVolumeRef = useRef<HTMLDivElement>(null);
+  const injuryHistoryRef = useRef<HTMLDivElement | null>(null);
+  const fitnessLevelRef = useRef<HTMLDivElement | null>(null);
+  const trainingVolumeRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
     if (ref.current) {
       ref.current.scrollIntoView({ 
         behavior: 'smooth', 
