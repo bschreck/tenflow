@@ -1,8 +1,15 @@
 import { ArrowRight, Star, Users, Target } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+
+  const handleStartJourney = () => {
+    navigate("/onboarding");
+  };
+
   return (
     <div className="mx-auto max-w-5xl">
       <div className="relative overflow-hidden rounded-2xl bg-black/5 dark:bg-black/30">
@@ -61,6 +68,7 @@ export default function DashboardPage() {
             <div className="mt-10">
               <Button
                 size="lg"
+                onClick={handleStartJourney}
                 className="h-12 px-8 text-base bg-white text-slate-900 hover:bg-white/90"
               >
                 Start Your Journey

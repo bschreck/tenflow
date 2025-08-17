@@ -1,7 +1,7 @@
 .PHONY: help start stop restart backend-start frontend-start backend-restart frontend-restart \
  logs logs-backend logs-frontend logs-db shell-backend shell-frontend shell-db clean build dev prod \
- migrate migrate-rev migrate-up migrate-down migrate-current migrate-history migrate-heads migrate-stamp \
- db-drop db-reset seed rebuild tools-up tools-down
+ migrate migrate-rev migrate-down migrate-current migrate-history migrate-heads migrate-stamp migrate-local \
+ db-drop db-reset seed rebuild tools-up tools-down dev-backend dev-frontend dev-backend-install dev-frontend-install
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -63,10 +63,6 @@ build: ensure-dev-start-prereqs ## Build all services
 prod: ## Build for production
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
 
-migrate: ensure-dev-start-prereqs ## Run database migrations
-	docker compose exec backend uv run alembic upgrade head
-
-
 # Migration helpers
 MIG_MSG ?= "update"
 STEP ?= 1
@@ -74,7 +70,7 @@ STEP ?= 1
 migrate-rev: ensure-dev-start-prereqs ## Create a new autogenerate revision (usage: make migrate-rev MIG_MSG="message")
 	docker compose exec backend uv run alembic revision --autogenerate -m $(MIG_MSG)
 
-migrate-up: ensure-dev-start-prereqs ## Upgrade to head
+migrate: ensure-dev-start-prereqs ## Upgrade to head
 	docker compose exec backend uv run alembic upgrade head
 
 migrate-down: ensure-dev-start-prereqs ## Downgrade one or more steps (usage: make migrate-down STEP=1)
@@ -91,6 +87,9 @@ migrate-heads: ensure-dev-start-prereqs ## Show head revisions
 
 migrate-stamp: ensure-dev-start-prereqs ## Stamp the database with the latest head without running migrations
 	docker compose exec backend uv run alembic stamp head
+
+migrate-local:
+	cd backend && uv run alembic upgrade head
 
 PYTEST_ARGS ?=
 
@@ -122,6 +121,26 @@ tools-up: ensure-dev-start-prereqs ## Start extra tools (pgAdmin) profile
 
 tools-down: ensure-dev-start-prereqs ## Stop extra tools profile
 	docker compose --profile tools down
+
+# Local development commands (no Docker)
+dev-backend: ## Run backend locally with uv (requires PostgreSQL running)
+	cd backend && uv run uvicorn tenflow.main:app --reload --host 0.0.0.0 --port 8000
+
+dev-frontend: ## Run frontend locally with npm
+	cd frontend && npm run dev
+
+dev-backend-install: ## Install backend dependencies locally with uv
+	cd backend && uv sync
+
+dev-frontend-install: ## Install frontend dependencies locally with npm
+	cd frontend && npm install
+
+dev: ## Start both backend and frontend locally (requires PostgreSQL)
+	@echo "Starting local development servers..."
+	@echo "Make sure PostgreSQL is running on localhost:5432"
+	@echo "Backend will be at http://localhost:8000"
+	@echo "Frontend will be at http://localhost:5173"
+	make -j2 dev-backend dev-frontend
 
 modal-deploy:
 	cd backend && MODAL_ENVIRONMENT=tenflow uv run modal deploy modal_deploy.py

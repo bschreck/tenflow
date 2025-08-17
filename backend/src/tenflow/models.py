@@ -6,22 +6,6 @@ from sqlmodel import Field, SQLModel, Relationship, Column, JSON
 import enum
 
 
-# Enums
-class WorkflowStatus(str, enum.Enum):
-    DRAFT = 'draft'
-    ACTIVE = 'active'
-    PAUSED = 'paused'
-    ARCHIVED = 'archived'
-
-
-class RunStatus(str, enum.Enum):
-    PENDING = 'pending'
-    RUNNING = 'running'
-    SUCCESS = 'success'
-    FAILED = 'failed'
-    CANCELLED = 'cancelled'
-
-
 # User Models
 class UserBase(SQLModel):
     email: str = Field(unique=True, index=True)
@@ -36,9 +20,6 @@ class User(UserBase, table=True):
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime | None = None
-
-    # Relationships
-    workflows: list['Workflow'] = Relationship(back_populates='user')
 
 
 class UserCreate(UserBase):
@@ -58,111 +39,6 @@ class UserUpdate(SQLModel):
     password: str | None = None
     is_active: bool | None = None
     is_superuser: bool | None = None
-
-
-# Workflow Step Models
-class WorkflowStepBase(SQLModel):
-    name: str
-    type: str  # e.g., "trigger", "action", "condition"
-    configuration: dict[str, Any] = Field(default={}, sa_column=Column(JSON))
-    position: int
-
-
-class WorkflowStep(WorkflowStepBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    workflow_id: int = Field(foreign_key='workflow.id')
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime | None = None
-
-    # Relationships
-    workflow: Optional['Workflow'] = Relationship(back_populates='steps')
-
-
-class WorkflowStepCreate(WorkflowStepBase):
-    pass
-
-
-class WorkflowStepRead(WorkflowStepBase):
-    id: int
-    workflow_id: int
-    created_at: datetime
-    updated_at: datetime | None = None
-
-
-class WorkflowStepUpdate(SQLModel):
-    name: str | None = None
-    type: str | None = None
-    configuration: dict[str, Any] | None = None
-    position: int | None = None
-
-
-# Workflow Models
-class WorkflowBase(SQLModel):
-    name: str
-    description: str | None = None
-    status: WorkflowStatus = WorkflowStatus.DRAFT
-    configuration: dict[str, Any] = Field(default={}, sa_column=Column(JSON))
-
-
-class Workflow(WorkflowBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key='user.id')
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime | None = None
-
-    # Relationships
-    user: User | None = Relationship(back_populates='workflows')
-    steps: list[WorkflowStep] = Relationship(back_populates='workflow')
-    runs: list['WorkflowRun'] = Relationship(back_populates='workflow')
-
-
-class WorkflowCreate(WorkflowBase):
-    steps: list[WorkflowStepCreate] = []
-
-
-class WorkflowRead(WorkflowBase):
-    id: int
-    user_id: int
-    created_at: datetime
-    updated_at: datetime | None = None
-    steps: list[WorkflowStepRead] = []
-
-
-class WorkflowUpdate(SQLModel):
-    name: str | None = None
-    description: str | None = None
-    status: WorkflowStatus | None = None
-    configuration: dict[str, Any] | None = None
-
-
-# Workflow Run Models
-class WorkflowRunBase(SQLModel):
-    workflow_id: int
-    status: RunStatus = RunStatus.PENDING
-    error_message: str | None = None
-    logs: list[dict[str, Any]] = Field(default=[], sa_column=Column(JSON))
-
-
-class WorkflowRun(WorkflowRunBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    workflow_id: int = Field(foreign_key='workflow.id')
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
-    # Relationships
-    workflow: Workflow | None = Relationship(back_populates='runs')
-
-
-class WorkflowRunCreate(SQLModel):
-    workflow_id: int
-
-
-class WorkflowRunRead(WorkflowRunBase):
-    id: int
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-    created_at: datetime
 
 
 # Auth Models

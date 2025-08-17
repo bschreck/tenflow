@@ -11,9 +11,8 @@ import DashboardPage from "@/pages/DashboardPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import SettingsPage from "@/pages/SettingsPage";
-import WorkflowBuilderPage from "@/pages/WorkflowBuilderPage";
-import WorkflowDetailPage from "@/pages/WorkflowDetailPage";
-import WorkflowsPage from "@/pages/WorkflowsPage";
+import OnboardingPage from "@/pages/OnboardingPage";
+import RaceCalendarPage from "@/pages/RaceCalendarPage";
 import { useAuthStore } from "@/stores/auth";
 
 function App() {
@@ -47,12 +46,12 @@ function App() {
           element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}
         >
           <Route path="/" element={<DashboardPage />} />
-          <Route path="/workflows" element={<WorkflowsPage />} />
-          <Route path="/workflows/new" element={<WorkflowBuilderPage />} />
-          <Route path="/workflows/:id" element={<WorkflowDetailPage />} />
-          <Route path="/workflows/:id/edit" element={<WorkflowBuilderPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
+
+        {/* New fitness app routes - no auth required for demo */}
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/race-calendar" element={<RaceCalendarPage />} />
       </Routes>
     </Router>
   );
