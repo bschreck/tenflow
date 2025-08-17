@@ -56,7 +56,26 @@ function OnboardingPageContent() {
   const currentIndex = utils.getIndex(stepper.current.id);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen pb-20 relative">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: "url(/hero-placeholder.svg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        aria-hidden
+      />
+
+      {/* Overlay Gradient */}
+      <div className="fixed inset-0 z-0 bg-linear-to-t from-black/70 via-black/40 to-black/20" />
+
+      {/* Onboarding Semi-Opaque Background */}
+      <div className="fixed inset-0 z-5 bg-gray-100/80 backdrop-blur-sm" />
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen pb-20">
       <nav aria-label="Onboarding Steps" className="group my-4 px-4">
         {/* Desktop: Full stepper */}
         <ol
@@ -81,7 +100,7 @@ function OnboardingPageContent() {
                 >
                   {index + 1}
                 </Button>
-                <span className="text-xs text-gray-600 font-medium whitespace-nowrap">{step.title}</span>
+                <span className="text-xs text-gray-700 font-medium whitespace-nowrap">{step.title}</span>
               </li>
               {index < array.length - 1 && (
                 <Separator
@@ -122,8 +141,8 @@ function OnboardingPageContent() {
                 {currentIndex + 1}
               </Button>
             </div>
-            <span className="text-xs text-gray-600 font-medium text-center">{stepper.current.title}</span>
-            <span className="text-xs text-gray-400">Step {currentIndex + 1} of {steps.length}</span>
+            <span className="text-xs text-gray-700 font-medium text-center">{stepper.current.title}</span>
+            <span className="text-xs text-gray-500">Step {currentIndex + 1} of {steps.length}</span>
           </div>
 
           <Button
@@ -161,6 +180,7 @@ function OnboardingPageContent() {
         completedSteps={currentIndex + 1}
         showProgress={true}
       />
+      </div>
     </div>
   );
 }

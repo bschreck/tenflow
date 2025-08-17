@@ -54,13 +54,29 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-background to-secondary/20 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: "url(/hero-placeholder.svg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        aria-hidden
+      />
+
+      {/* Overlay Gradient */}
+      <div className="fixed inset-0 z-0 bg-linear-to-t from-black/70 via-black/40 to-black/20" />
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-md">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
             <div className="flex items-center space-x-2">
-              <Zap className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">Tenflow</span>
+              <Zap className="h-8 w-8 text-white" />
+              <span className="text-2xl font-bold text-white">Tenflow</span>
             </div>
           </div>
           <CardTitle className="text-2xl text-center">
@@ -139,6 +155,7 @@ export default function RegisterPage() {
           </CardFooter>
         </form>
       </Card>
+      </div>
     </div>
   );
 }

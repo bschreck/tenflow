@@ -88,7 +88,26 @@ export default function TrainingPlanSummary() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4 relative">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: "url(/hero-placeholder.svg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        aria-hidden
+      />
+
+      {/* Overlay Gradient */}
+      <div className="fixed inset-0 z-0 bg-linear-to-t from-black/70 via-black/40 to-black/20" />
+
+      {/* Onboarding Semi-Opaque Background */}
+      <div className="fixed inset-0 z-5 bg-gray-100/80 backdrop-blur-sm" />
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen py-8 px-4">
       <div className="max-w-md mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -107,13 +126,6 @@ export default function TrainingPlanSummary() {
 
         {/* Training Plan Section */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-900 text-center">
-            Your Personalized Training Plan
-          </h2>
-          <p className="text-gray-600 text-center">
-            Based on your assessment, we've created a custom plan to help you achieve your goals
-          </p>
-
           {/* Goal Card */}
           <Card className="p-6 border border-gray-300 rounded-xl bg-gray-100">
             <div className="flex items-center justify-between">
@@ -263,6 +275,7 @@ export default function TrainingPlanSummary() {
             )}
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );

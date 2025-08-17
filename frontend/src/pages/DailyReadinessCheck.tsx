@@ -11,7 +11,23 @@ export default function DailyReadinessCheck() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4 relative">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: "url(/hero-placeholder.svg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        aria-hidden
+      />
+
+      {/* Overlay Gradient */}
+      <div className="fixed inset-0 z-0 bg-linear-to-t from-black/70 via-black/40 to-black/20" />
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen py-8 px-4">
       <div className="max-w-md mx-auto">
         <div className="text-center space-y-6">
           {/* Icon */}
@@ -23,10 +39,10 @@ export default function DailyReadinessCheck() {
 
           {/* Heading */}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-white mb-2">
               Daily Readiness Check
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               This feature is coming soon! We'll assess how you're feeling today to customize your workout.
             </p>
           </div>
@@ -62,6 +78,7 @@ export default function DailyReadinessCheck() {
             Continue to Dashboard
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );

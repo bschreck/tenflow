@@ -30,20 +30,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen -mt-16">
-      <div className="relative overflow-hidden bg-black/5 dark:bg-black/30 min-h-screen">
-        {/* Background image */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url(/hero-placeholder.svg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-          aria-hidden
-        />
-
-        {/* Overlay gradient for readability */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/40 to-black/20" />
+      <div className="relative overflow-hidden min-h-screen">
 
         {/* Content */}
         <div className="relative px-6 sm:px-10 py-16 sm:py-20 lg:py-24 text-white min-h-screen flex flex-col justify-center">

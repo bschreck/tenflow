@@ -22,22 +22,32 @@ export default function Layout() {
   const isDashboard = location.pathname === "/";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Global Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: "url(/hero-placeholder.svg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        aria-hidden
+      />
+
+      {/* Global Overlay Gradient */}
+      <div className="fixed inset-0 z-0 bg-linear-to-t from-black/70 via-black/40 to-black/20" />
+
+      {/* App Content */}
+      <div className="relative z-10 min-h-screen">
       {/* Top Navigation Bar */}
       <div className={cn(
         "fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between px-4 lg:px-8",
-        isDashboard ? "bg-transparent" : "bg-background border-b"
+        isDashboard ? "bg-transparent" : "bg-black/80 backdrop-blur-md border-b border-white/20"
       )}>
         {/* Logo - Left Side */}
         <Link to="/" className="flex items-center space-x-2">
-          <Zap className={cn(
-            "h-6 w-6",
-            isDashboard ? "text-white" : "text-primary"
-          )} />
-          <span className={cn(
-            "text-xl font-bold",
-            isDashboard ? "text-white" : "text-foreground"
-          )}>
+          <Zap className="h-6 w-6 text-white" />
+          <span className="text-xl font-bold text-white">
             Tenflow
           </span>
         </Link>
@@ -47,18 +57,10 @@ export default function Layout() {
           <div className="relative">
             <button
               onClick={handleProfileClick}
-              className={cn(
-                "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
-                isDashboard 
-                  ? "hover:bg-white/10 text-white" 
-                  : "hover:bg-accent text-foreground"
-              )}
+              className="flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors hover:bg-white/10 text-white"
             >
               {/* Profile Photo Placeholder */}
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center",
-                isDashboard ? "bg-white/20" : "bg-primary/10"
-              )}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20">
                 <span className="text-sm font-medium">
                   {user?.email?.charAt(0).toUpperCase()}
                 </span>
@@ -82,11 +84,11 @@ export default function Layout() {
                 />
                 
                 {/* Dropdown */}
-                <div className="absolute right-0 mt-2 w-48 bg-card border rounded-lg shadow-lg z-20">
+                <div className="absolute right-0 mt-2 w-48 bg-black/90 backdrop-blur-md border border-white/20 rounded-lg shadow-lg z-20">
                   <div className="py-1">
                     <Link
                       to="/settings"
-                      className="flex items-center px-4 py-2 text-sm hover:bg-accent transition-colors"
+                      className="flex items-center px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
                       onClick={() => setProfileDropdownOpen(false)}
                     >
                       <User className="h-4 w-4 mr-2" />
@@ -94,7 +96,7 @@ export default function Layout() {
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-sm hover:bg-accent transition-colors text-left"
+                      className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors text-left"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout
@@ -110,10 +112,13 @@ export default function Layout() {
       {/* Main content */}
       <div className="pt-16">
         <main className={cn(
-          location.pathname === "/" ? "" : "p-4 lg:p-8"
+          location.pathname === "/" 
+            ? "" 
+            : "p-4 lg:p-8 bg-black/20 backdrop-blur-sm min-h-screen text-white"
         )}>
           <Outlet />
         </main>
+      </div>
       </div>
     </div>
   );
