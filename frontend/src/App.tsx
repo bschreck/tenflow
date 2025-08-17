@@ -12,7 +12,6 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import SettingsPage from "@/pages/SettingsPage";
 import OnboardingPage from "@/pages/OnboardingPage";
-import RaceCalendarPage from "@/pages/RaceCalendarPage";
 import { useAuthStore } from "@/stores/auth";
 
 function App() {
@@ -51,7 +50,6 @@ function App() {
 
         {/* New fitness app routes - no auth required for demo */}
         <Route path="/onboarding" element={<OnboardingPage />} />
-        <Route path="/race-calendar" element={<RaceCalendarPage />} />
       </Routes>
     </Router>
   );

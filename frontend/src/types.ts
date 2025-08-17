@@ -10,21 +10,41 @@ export type User = components["schemas"]["UserRead"];
 export type UserCreate = components["schemas"]["UserCreate"];
 export type UserUpdate = components["schemas"]["UserUpdate"];
 
-// Workflow types
-export type Workflow = components["schemas"]["WorkflowRead"];
-export type WorkflowCreate = components["schemas"]["WorkflowCreate"];
-export type WorkflowUpdate = components["schemas"]["WorkflowUpdate"];
-export type WorkflowStatus = components["schemas"]["WorkflowStatus"];
-
-// Workflow step types
-export type WorkflowStep = components["schemas"]["WorkflowStepRead"];
-export type WorkflowStepCreate = components["schemas"]["WorkflowStepCreate"];
-
-// Workflow run types
-export type WorkflowRun = components["schemas"]["WorkflowRunRead"];
-export type RunStatus = components["schemas"]["RunStatus"];
-
 // Request types for forms/API calls
-export type CreateWorkflowRequest = components["schemas"]["WorkflowCreate"];
-export type UpdateWorkflowRequest = components["schemas"]["WorkflowUpdate"];
 export type RegisterRequest = components["schemas"]["UserCreate"];
+
+// Onboarding types
+export interface OnboardingFormData {
+  selectedGoal?: {
+    id: string;
+    name: string;
+    distance: string;
+    type: 'goal' | 'race';
+  };
+  fitnessData?: {
+    trailExperience: string;
+    injuryHistory: string;
+    fitnessLevel: string;
+    weeklyHours: number;
+    trainingDays: number;
+  };
+  // Add more fields as needed for future steps
+}
+
+export interface OnboardingFormContextType {
+  formData: OnboardingFormData;
+  updateFormData: (data: Partial<OnboardingFormData>) => void;
+  submitForm: () => Promise<void>;
+}
+
+export interface RaceOption {
+  id: string;
+  name: string;
+  distance: string;
+  description: string;
+  participantCount: number;
+  badge?: string;
+  location?: string;
+  date?: string;
+  category: 'goal' | 'race';
+}

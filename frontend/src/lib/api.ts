@@ -1,12 +1,8 @@
 import axios from "axios";
 import type {
-  Workflow,
-  CreateWorkflowRequest,
-  UpdateWorkflowRequest,
   AuthResponse,
   RegisterRequest,
   User,
-  WorkflowRun,
 } from "@/types";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
@@ -70,46 +66,6 @@ export const authAPI = {
 
   getCurrentUser: async (): Promise<User> => {
     const response = await api.get<User>("/users/me");
-    return response.data;
-  },
-};
-
-// Workflows API
-export const workflowsAPI = {
-  list: async (): Promise<Workflow[]> => {
-    const response = await api.get<Workflow[]>("/workflows/");
-    return response.data;
-  },
-
-  get: async (id: number): Promise<Workflow> => {
-    const response = await api.get<Workflow>(`/workflows/${id}`);
-    return response.data;
-  },
-
-  create: async (data: CreateWorkflowRequest): Promise<Workflow> => {
-    const response = await api.post<Workflow>("/workflows/", data);
-    return response.data;
-  },
-
-  update: async (
-    id: number,
-    data: UpdateWorkflowRequest,
-  ): Promise<Workflow> => {
-    const response = await api.put<Workflow>(`/workflows/${id}`, data);
-    return response.data;
-  },
-
-  delete: async (id: number): Promise<void> => {
-    await api.delete(`/workflows/${id}`);
-  },
-
-  run: async (id: number): Promise<WorkflowRun> => {
-    const response = await api.post<WorkflowRun>(`/workflows/${id}/run`);
-    return response.data;
-  },
-
-  getRuns: async (id: number): Promise<WorkflowRun[]> => {
-    const response = await api.get<WorkflowRun[]>(`/workflows/${id}/runs`);
     return response.data;
   },
 };
