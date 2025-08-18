@@ -10,6 +10,11 @@ export type User = components["schemas"]["UserRead"];
 export type UserCreate = components["schemas"]["UserCreate"];
 export type UserUpdate = components["schemas"]["UserUpdate"];
 
+// Training Plan types
+export type TrainingPlan = components["schemas"]["TrainingPlanRead"];
+export type TrainingPlanCreate = components["schemas"]["TrainingPlanCreate"];
+export type TrainingPlanUpdate = components["schemas"]["TrainingPlanUpdate"];
+
 // Request types for forms/API calls
 export type RegisterRequest = components["schemas"]["UserCreate"];
 

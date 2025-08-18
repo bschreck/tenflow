@@ -90,7 +90,7 @@ migrate-stamp: ensure-dev-start-prereqs ## Stamp the database with the latest he
 
 migrate-local:
 	cd backend && uv run alembic upgrade head
-
+	
 PYTEST_ARGS ?=
 
 test-backend: ensure-dev-start-prereqs ## Run backend tests in a one-off container (no service needed)
@@ -147,6 +147,9 @@ modal-deploy:
 
 modal-migrate:
 	cd backend && MODAL_ENVIRONMENT=tenflow uv run modal run modal_deploy.py::run_migrations
+
+modal-migrate-down:
+	cd backend && MODAL_ENVIRONMENT=tenflow uv run modal run modal_deploy.py::downgrade_migrations --revision $(REVISION)
 
 format:
 	cd backend && uv run ruff check --fix --output-format=github .

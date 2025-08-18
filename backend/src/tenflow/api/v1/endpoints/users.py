@@ -1,6 +1,8 @@
 from typing import Any
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 
 from tenflow.core import security
 from tenflow.core.deps import get_current_active_user, get_current_active_superuser
@@ -46,8 +48,10 @@ def read_user_me(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """
-    Get current user.
+    Get current user with training plans.
     """
+    # The current_user already comes from the database via get_current_active_user
+    # The relationship should be available through lazy loading
     return current_user
 
 
@@ -76,7 +80,7 @@ def update_user_me(
 
 @router.get('/{user_id}', response_model=UserRead)
 def read_user_by_id(
-    user_id: int,
+    user_id: UUID,
     current_user: User = Depends(get_current_active_user),
     session: Session = Depends(get_session_gen),
 ) -> Any:

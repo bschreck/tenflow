@@ -5,6 +5,8 @@ import type {
   User,
   OnboardingFormData,
   TrainingProgression,
+  TrainingPlan,
+  TrainingPlanCreate,
 } from "@/types";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
@@ -142,4 +144,100 @@ export const getTrainingProgression = async (formData: OnboardingFormData): Prom
   // return response.data;
   
   return mockProgression;
+};
+
+// Training Plan API
+export const trainingPlanAPI = {
+  create: async (data: TrainingPlanCreate): Promise<TrainingPlan> => {
+    const response = await api.post<TrainingPlan>("/training-plans/", data);
+    return response.data;
+  },
+
+  getAll: async (params?: { skip?: number; limit?: number; is_active?: boolean }): Promise<TrainingPlan[]> => {
+    const response = await api.get<TrainingPlan[]>("/training-plans/", { params });
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<TrainingPlan> => {
+    const response = await api.get<TrainingPlan>(`/training-plans/${id}`);
+    return response.data;
+  },
+
+  update: async (id: string, data: Partial<TrainingPlanCreate>): Promise<TrainingPlan> => {
+    const response = await api.put<TrainingPlan>(`/training-plans/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/training-plans/${id}`);
+  },
+
+  getCount: async (is_active?: boolean): Promise<{ count: number }> => {
+    const params = is_active !== undefined ? { is_active } : {};
+    const response = await api.get<{ count: number }>("/training-plans/stats/count", { params });
+    return response.data;
+  },
+};
+
+// Helper function to create a training plan from onboarding data
+export const createTrainingPlanFromOnboarding = async (formData: OnboardingFormData): Promise<TrainingPlan> => {
+  const goalData = formData.selectedGoal;
+  const fitnessData = formData.fitnessData;
+  
+  if (!goalData || !fitnessData) {
+    throw new Error('Missing required onboarding data');
+  }
+  
+  // Calculate dates
+  const startDate = new Date();
+  let durationWeeks = 12; // default
+  
+  // Duration based on goal
+  if (goalData.distance.includes('100') || goalData.distance.includes('200')) {
+    durationWeeks = 40;
+  } else if (goalData.distance.includes('50')) {
+    durationWeeks = 24;
+  } else if (goalData.distance.toLowerCase().includes('marathon')) {
+    durationWeeks = 16;
+  }
+  
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + (durationWeeks * 7));
+  
+  // Map fitness level to intensity
+  let fitnessLevel = 'moderate';
+  switch (fitnessData.fitnessLevel) {
+    case 'beginner':
+      fitnessLevel = 'beginner';
+      break;
+    case 'recreational':
+      fitnessLevel = 'intermediate';
+      break;
+    case 'competitive':
+      fitnessLevel = 'advanced';
+      break;
+    case 'elite':
+      fitnessLevel = 'elite';
+      break;
+  }
+  
+  const trainingPlanData: TrainingPlanCreate = {
+    goal: goalData.name,
+    plan_name: `${goalData.name} Training Plan`,
+    start_date: startDate.toISOString().split('T')[0],
+    end_date: endDate.toISOString().split('T')[0],
+    duration_weeks: durationWeeks,
+    fitness_level: fitnessLevel,
+    weekly_distance_base: fitnessData.weeklyHours * 8, // Rough conversion from hours to distance
+    weekly_distance_peak: fitnessData.weeklyHours * 20, // Peak distance
+    training_days_per_week: fitnessData.trainingDays,
+    plan_data: {
+      onboardingData: formData,
+      trailExperience: fitnessData.trailExperience,
+      injuryHistory: fitnessData.injuryHistory,
+    },
+    is_active: true,
+  };
+  
+  return trainingPlanAPI.create(trainingPlanData);
 };

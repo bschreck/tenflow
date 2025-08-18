@@ -25,25 +25,13 @@ export const OnboardingFormProvider = ({ children }: OnboardingFormProviderProps
     try {
       console.log('Submitting onboarding form:', formData);
       
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit form');
-      }
-
-      const result = await response.json();
-      console.log('Form submitted successfully:', result);
-      
-      // Clear the persisted data and training progression cache after successful submission
+      // For now, just clear the form data
+      // The actual training plan creation happens in TrainingPlanSummary
+      // when the user clicks "Start Training" after authentication
       clearFormData();
       clearCache();
+      
+      console.log('Form submitted successfully');
     } catch (error) {
       console.error('Error submitting form:', error);
       throw error;

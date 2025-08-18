@@ -3,18 +3,14 @@ import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useOnboardingForm } from '@/components/onboarding/OnboardingFormProvider';
-import { useTrainingProgression } from '@/hooks/useTrainingProgression';
 import { useAuthStore } from '@/stores/auth';
-import { submitOnboardingData } from '@/lib/api';
+import { createTrainingPlanFromOnboarding } from '@/lib/api';
 
 export default function TrainingPlanSummary() {
   const navigate = useNavigate();
   const { formData } = useOnboardingForm();
   const { isAuthenticated } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Use the cached training progression hook
-  const { trainingProgression, isLoading, error } = useTrainingProgression(formData);
 
   const handleStartTraining = async () => {
     // If user is not authenticated, redirect to register page first
@@ -25,15 +21,15 @@ export default function TrainingPlanSummary() {
 
     try {
       setIsSubmitting(true);
-      // Submit the onboarding data
-      await submitOnboardingData(formData);
+      // Create the training plan from onboarding data
+      await createTrainingPlanFromOnboarding(formData);
       
-      // Redirect to daily readiness check
-      navigate('/daily-readiness-check');
+      // Redirect to dashboard to see the new training plan
+      navigate('/');
     } catch (error) {
-      console.error('Error submitting onboarding data:', error);
-      // For now, still redirect to the placeholder page
-      navigate('/daily-readiness-check');
+      console.error('Error creating training plan:', error);
+      // For now, still redirect to the dashboard
+      navigate('/');
     } finally {
       setIsSubmitting(false);
     }
@@ -44,47 +40,35 @@ export default function TrainingPlanSummary() {
     navigate('/onboarding', { state: { step: 'connect' } });
   };
 
-  // Get goal data or fallback
+  // Get goal and fitness data
   const goalData = formData.selectedGoal;
+  const fitnessData = formData.fitnessData;
 
-  // Show loading state while fetching progression data
-  if (isLoading || !trainingProgression) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center space-y-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-              <p className="text-gray-600">Creating your personalized training plan...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Calculate plan details based on onboarding data
+  let durationWeeks = 12; // default
+  let intensityLevel = 'Moderate';
+  
+  if (goalData?.distance.includes('100') || goalData?.distance.includes('200')) {
+    durationWeeks = 40;
+  } else if (goalData?.distance.includes('50')) {
+    durationWeeks = 24;
+  } else if (goalData?.distance.toLowerCase().includes('marathon')) {
+    durationWeeks = 16;
   }
-
-  // Show error state if there was a problem fetching data
-  if (error && !trainingProgression) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center space-y-4">
-              <div className="text-red-500 mb-4">
-                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Unable to Generate Plan</h2>
-              <p className="text-gray-600 mb-6">{error}</p>
-              <Button onClick={() => window.location.reload()}>
-                Try Again
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  
+  switch (fitnessData?.fitnessLevel) {
+    case 'beginner':
+      intensityLevel = 'Easy';
+      break;
+    case 'recreational':
+      intensityLevel = 'Moderate';
+      break;
+    case 'competitive':
+      intensityLevel = 'High';
+      break;
+    case 'elite':
+      intensityLevel = 'Elite Intensity';
+      break;
   }
 
   return (
@@ -139,12 +123,12 @@ export default function TrainingPlanSummary() {
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-gray-900">
-                  {trainingProgression.programDuration}
+                  {durationWeeks}
                 </div>
                 <div className="text-sm text-gray-600">Week Program</div>
               </div>
               <div className="bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {trainingProgression.intensityLevel}
+                {intensityLevel}
               </div>
             </div>
           </Card>
@@ -162,7 +146,7 @@ export default function TrainingPlanSummary() {
               {/* Current Weekly Hours */}
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Current Weekly Hours</span>
-                <span className="font-semibold text-gray-900">{trainingProgression.currentWeeklyHours} hours</span>
+                <span className="font-semibold text-gray-900">{fitnessData?.weeklyHours || 5} hours</span>
               </div>
               
               {/* Progress Bar */}
@@ -170,25 +154,25 @@ export default function TrainingPlanSummary() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-gray-900 h-2 rounded-full" 
-                    style={{ width: `${(trainingProgression.currentWeeklyHours / trainingProgression.peakWeeklyHours) * 100}%` }}
+                    style={{ width: `40%` }}
                   ></div>
                 </div>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Peak Weekly Hours</span>
-                <span className="font-semibold text-gray-900">{trainingProgression.peakWeeklyHours} hours</span>
+                <span className="font-semibold text-gray-900">{Math.round((fitnessData?.weeklyHours || 5) * 2.5)} hours</span>
               </div>
 
               {/* Training Stats */}
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div>
                   <div className="text-gray-700 text-sm">Training Days</div>
-                  <div className="font-semibold text-gray-900">{trainingProgression.trainingDaysPerWeek} days/week</div>
+                  <div className="font-semibold text-gray-900">{fitnessData?.trainingDays || 4} days/week</div>
                 </div>
                 <div>
-                  <div className="text-gray-700 text-sm">Weekly Increase</div>
-                  <div className="font-semibold text-gray-900">{trainingProgression.weeklyIncrease} hours</div>
+                  <div className="text-gray-700 text-sm">Experience Level</div>
+                  <div className="font-semibold text-gray-900 capitalize">{fitnessData?.trailExperience || 'Intermediate'}</div>
                 </div>
               </div>
             </div>

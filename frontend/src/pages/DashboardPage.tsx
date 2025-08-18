@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/auth";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isLoading } = useAuthStore();
 
   const handleStartJourney = () => {
     navigate("/onboarding");
@@ -17,16 +17,28 @@ export default function DashboardPage() {
     navigate("/daily-readiness-check");
   };
 
-  // Mock training plan data
-  const mockTrainingPlan = {
-    goal: "50K Trail Run",
-    programDuration: 24,
-    intensityLevel: "Moderate",
-    currentWeek: 3,
-    weeklyHours: 8,
-    nextWorkout: "Long Run - 12 miles",
-    completionRate: 85
+  // Get the active training plan from user data
+  const activeTrainingPlan = user?.training_plans?.find(plan => plan.is_active);
+  
+  // Calculate current week and other display data
+  const calculateCurrentWeek = (startDate: string, durationWeeks: number) => {
+    const start = new Date(startDate);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const currentWeek = Math.min(Math.ceil(diffDays / 7), durationWeeks);
+    return currentWeek;
   };
+  
+  const trainingPlanData = activeTrainingPlan ? {
+    goal: activeTrainingPlan.goal,
+    programDuration: activeTrainingPlan.duration_weeks,
+    intensityLevel: activeTrainingPlan.fitness_level.charAt(0).toUpperCase() + activeTrainingPlan.fitness_level.slice(1),
+    currentWeek: calculateCurrentWeek(activeTrainingPlan.start_date, activeTrainingPlan.duration_weeks),
+    weeklyHours: activeTrainingPlan.training_days_per_week * 1.5, // Rough estimate
+    nextWorkout: "Long Run - 12 miles", // This would come from actual workout data
+    completionRate: 85 // This would be calculated from actual progress data
+  } : null;
 
   return (
     <div className="min-h-screen -mt-16">
@@ -89,61 +101,103 @@ export default function DashboardPage() {
               </>
             ) : (
               <div className="mt-10">
-                <Card className="mx-auto max-w-2xl bg-white/95 backdrop-blur-sm border-white/20">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-center text-slate-900">
-                      Welcome back, {user?.full_name || user?.email?.split('@')[0]}! 👋
-                    </CardTitle>
-                    <p className="text-center text-slate-600 text-sm">
-                      Your training plan is ready to continue
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Goal and Progress Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center p-4 bg-slate-50 rounded-lg">
-                        <Target className="h-6 w-6 text-slate-700 mx-auto mb-2" />
-                        <div className="font-semibold text-slate-900">{mockTrainingPlan.goal}</div>
-                        <div className="text-sm text-slate-600">{mockTrainingPlan.intensityLevel} Intensity</div>
+                {isLoading ? (
+                  <Card className="mx-auto max-w-2xl bg-white/95 backdrop-blur-sm border-white/20">
+                    <CardContent className="p-8">
+                      <div className="text-center space-y-4">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto"></div>
+                        <p className="text-slate-600">Loading your training plan...</p>
                       </div>
-                      <div className="text-center p-4 bg-slate-50 rounded-lg">
-                        <Calendar className="h-6 w-6 text-slate-700 mx-auto mb-2" />
-                        <div className="font-semibold text-slate-900">Week {mockTrainingPlan.currentWeek}</div>
-                        <div className="text-sm text-slate-600">of {mockTrainingPlan.programDuration}</div>
+                    </CardContent>
+                  </Card>
+                ) : trainingPlanData ? (
+                  <Card className="mx-auto max-w-2xl bg-white/95 backdrop-blur-sm border-white/20">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-center text-slate-900">
+                        Welcome back, {user?.full_name || user?.email?.split('@')[0]}! 👋
+                      </CardTitle>
+                      <p className="text-center text-slate-600 text-sm">
+                        Your training plan is ready to continue
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Goal and Progress Overview */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center p-4 bg-slate-50 rounded-lg">
+                          <Target className="h-6 w-6 text-slate-700 mx-auto mb-2" />
+                          <div className="font-semibold text-slate-900">{trainingPlanData.goal}</div>
+                          <div className="text-sm text-slate-600">{trainingPlanData.intensityLevel} Intensity</div>
+                        </div>
+                        <div className="text-center p-4 bg-slate-50 rounded-lg">
+                          <Calendar className="h-6 w-6 text-slate-700 mx-auto mb-2" />
+                          <div className="font-semibold text-slate-900">Week {trainingPlanData.currentWeek}</div>
+                          <div className="text-sm text-slate-600">of {trainingPlanData.programDuration}</div>
+                        </div>
+                        <div className="text-center p-4 bg-slate-50 rounded-lg">
+                          <TrendingUp className="h-6 w-6 text-slate-700 mx-auto mb-2" />
+                          <div className="font-semibold text-slate-900">{trainingPlanData.completionRate}%</div>
+                          <div className="text-sm text-slate-600">Completion Rate</div>
+                        </div>
                       </div>
-                      <div className="text-center p-4 bg-slate-50 rounded-lg">
-                        <TrendingUp className="h-6 w-6 text-slate-700 mx-auto mb-2" />
-                        <div className="font-semibold text-slate-900">{mockTrainingPlan.completionRate}%</div>
-                        <div className="text-sm text-slate-600">Completion Rate</div>
-                      </div>
-                    </div>
 
-                    {/* Next Workout */}
-                    <div className="bg-gradient-to-r from-slate-100 to-slate-50 p-4 rounded-lg">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Clock className="h-5 w-5 text-slate-700" />
-                        <span className="font-semibold text-slate-900">Next Workout</span>
+                      {/* Next Workout */}
+                      <div className="bg-gradient-to-r from-slate-100 to-slate-50 p-4 rounded-lg">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Clock className="h-5 w-5 text-slate-700" />
+                          <span className="font-semibold text-slate-900">Next Workout</span>
+                        </div>
+                        <p className="text-slate-700 mb-3">{trainingPlanData.nextWorkout}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-600">
+                            {trainingPlanData.weeklyHours} hours this week
+                          </span>
+                          <Button 
+                            onClick={handleViewTrainingPlan}
+                            className="bg-slate-900 hover:bg-slate-800 text-white"
+                          >
+                            Start Today's Training
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-slate-700 mb-3">{mockTrainingPlan.nextWorkout}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">
-                          {mockTrainingPlan.weeklyHours} hours this week
-                        </span>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="mx-auto max-w-2xl bg-white/95 backdrop-blur-sm border-white/20">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-center text-slate-900">
+                        Welcome back, {user?.full_name || user?.email?.split('@')[0]}! 👋
+                      </CardTitle>
+                      <p className="text-center text-slate-600 text-sm">
+                        Ready to create your personalized training plan?
+                      </p>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="text-center">
+                        <div className="bg-slate-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                          <Target className="h-8 w-8 text-slate-700" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Active Training Plan</h3>
+                        <p className="text-slate-600 mb-6">
+                          Complete our onboarding flow to get a personalized training plan tailored to your goals and fitness level.
+                        </p>
                         <Button 
-                          onClick={handleViewTrainingPlan}
+                          onClick={handleStartJourney}
                           className="bg-slate-900 hover:bg-slate-800 text-white"
                         >
-                          Start Today's Training
+                          Create Training Plan
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                )}
 
-                <p className="mt-6 text-sm opacity-80">
-                  Keep up the great work! You're {mockTrainingPlan.completionRate}% on track to reach your goal.
-                </p>
+                {trainingPlanData && (
+                  <p className="mt-6 text-sm opacity-80">
+                    Keep up the great work! You're {trainingPlanData.completionRate}% on track to reach your goal.
+                  </p>
+                )}
               </div>
             )}
           </div>

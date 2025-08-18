@@ -57,7 +57,7 @@ export interface paths {
         };
         /**
          * Read User Me
-         * @description Get current user.
+         * @description Get current user with training plans.
          */
         get: operations["read_user_me_api_v1_users_me_get"];
         /**
@@ -84,6 +84,78 @@ export interface paths {
          * @description Get a specific user by id.
          */
         get: operations["read_user_by_id_api_v1_users__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Training Plans
+         * @description Retrieve training plans for the current user.
+         */
+        get: operations["read_training_plans_api_v1_training_plans__get"];
+        put?: never;
+        /**
+         * Create Training Plan
+         * @description Create new training plan.
+         */
+        post: operations["create_training_plan_api_v1_training_plans__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/{training_plan_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Training Plan
+         * @description Get training plan by ID.
+         */
+        get: operations["read_training_plan_api_v1_training_plans__training_plan_id__get"];
+        /**
+         * Update Training Plan
+         * @description Update a training plan.
+         */
+        put: operations["update_training_plan_api_v1_training_plans__training_plan_id__put"];
+        post?: never;
+        /**
+         * Delete Training Plan
+         * @description Delete a training plan.
+         */
+        delete: operations["delete_training_plan_api_v1_training_plans__training_plan_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/training-plans/stats/count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Training Plan Count
+         * @description Get count of training plans for the current user.
+         */
+        get: operations["get_training_plan_count_api_v1_training_plans_stats_count_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -169,6 +241,125 @@ export interface components {
              */
             token_type: string;
         };
+        /** TrainingPlanCreate */
+        TrainingPlanCreate: {
+            /** Goal */
+            goal: string;
+            /** Plan Name */
+            plan_name: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Duration Weeks */
+            duration_weeks: number;
+            /** Fitness Level */
+            fitness_level: string;
+            /** Weekly Distance Base */
+            weekly_distance_base: number | string;
+            /** Weekly Distance Peak */
+            weekly_distance_peak: number | string;
+            /** Training Days Per Week */
+            training_days_per_week: number;
+            /** Plan Data */
+            plan_data?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+        };
+        /** TrainingPlanRead */
+        TrainingPlanRead: {
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+            /** Goal */
+            goal: string;
+            /** Plan Name */
+            plan_name: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Duration Weeks */
+            duration_weeks: number;
+            /** Fitness Level */
+            fitness_level: string;
+            /** Weekly Distance Base */
+            weekly_distance_base: string;
+            /** Weekly Distance Peak */
+            weekly_distance_peak: string;
+            /** Training Days Per Week */
+            training_days_per_week: number;
+            /** Plan Data */
+            plan_data?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** TrainingPlanUpdate */
+        TrainingPlanUpdate: {
+            /** Goal */
+            goal?: string | null;
+            /** Plan Name */
+            plan_name?: string | null;
+            /** Start Date */
+            start_date?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /** Duration Weeks */
+            duration_weeks?: number | null;
+            /** Fitness Level */
+            fitness_level?: string | null;
+            /** Weekly Distance Base */
+            weekly_distance_base?: number | string | null;
+            /** Weekly Distance Peak */
+            weekly_distance_peak?: number | string | null;
+            /** Training Days Per Week */
+            training_days_per_week?: number | null;
+            /** Plan Data */
+            plan_data?: {
+                [key: string]: unknown;
+            } | null;
+            /** Is Active */
+            is_active?: boolean | null;
+        };
         /** UserCreate */
         UserCreate: {
             /** Email */
@@ -204,8 +395,11 @@ export interface components {
              * @default false
              */
             is_superuser: boolean;
-            /** Id */
-            id: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
             /**
              * Created At
              * Format: date-time
@@ -213,6 +407,11 @@ export interface components {
             created_at: string;
             /** Updated At */
             updated_at?: string | null;
+            /**
+             * Training Plans
+             * @default []
+             */
+            training_plans: components["schemas"]["TrainingPlanRead"][];
         };
         /** UserUpdate */
         UserUpdate: {
@@ -401,7 +600,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                user_id: number;
+                user_id: string;
             };
             cookie?: never;
         };
@@ -414,6 +613,200 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_training_plans_api_v1_training_plans__get: {
+        parameters: {
+            query?: {
+                skip?: number;
+                limit?: number;
+                is_active?: boolean | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_training_plan_api_v1_training_plans__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_training_plan_api_v1_training_plans__training_plan_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                training_plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_training_plan_api_v1_training_plans__training_plan_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                training_plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingPlanUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingPlanRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_training_plan_api_v1_training_plans__training_plan_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                training_plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_training_plan_count_api_v1_training_plans_stats_count_get: {
+        parameters: {
+            query?: {
+                is_active?: boolean | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

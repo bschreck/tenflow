@@ -15,10 +15,13 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime | None = None
+
+    # Relationships
+    training_plans: list['TrainingPlan'] = Relationship(back_populates='user')
 
 
 class UserCreate(UserBase):
@@ -26,9 +29,10 @@ class UserCreate(UserBase):
 
 
 class UserRead(UserBase):
-    id: int
+    id: UUID
     created_at: datetime
     updated_at: datetime | None = None
+    training_plans: list['TrainingPlanRead'] = []
 
 
 class UserUpdate(SQLModel):
@@ -46,7 +50,7 @@ class Token(SQLModel):
 
 
 class TokenPayload(SQLModel):
-    sub: int | None = None
+    sub: UUID | None = None
 
 
 # ============================
@@ -74,7 +78,7 @@ class ComplianceScore(SQLModel, table=True):
 
 
 class TrainingPlanBase(SQLModel):
-    user_id: UUID
+    user_id: UUID = Field(foreign_key='user.id')
     goal: str
     plan_name: str
     start_date: date
@@ -96,7 +100,42 @@ class TrainingPlan(TrainingPlanBase, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Relationships
+    user: 'User' = Relationship(back_populates='training_plans')
     prescribed_workouts: list['PrescribedWorkout'] = Relationship(back_populates='training_plan')
+
+
+class TrainingPlanCreate(SQLModel):
+    goal: str
+    plan_name: str
+    start_date: date
+    end_date: date
+    duration_weeks: int
+    fitness_level: str
+    weekly_distance_base: Decimal
+    weekly_distance_peak: Decimal
+    training_days_per_week: int
+    plan_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
+    is_active: bool = True
+
+
+class TrainingPlanRead(TrainingPlanBase):
+    id: UUID
+    created_at: datetime
+    updated_at: datetime
+
+
+class TrainingPlanUpdate(SQLModel):
+    goal: str | None = None
+    plan_name: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    duration_weeks: int | None = None
+    fitness_level: str | None = None
+    weekly_distance_base: Decimal | None = None
+    weekly_distance_peak: Decimal | None = None
+    training_days_per_week: int | None = None
+    plan_data: dict[str, Any] | None = None
+    is_active: bool | None = None
 
 
 class PrescribedWorkoutBase(SQLModel):

@@ -67,6 +67,18 @@ def run_migrations():
     ]
     alembic.config.main(argv=alembic_args)
 
+@app.function()
+def downgrade_migrations(revision: str):
+    import alembic.config
+
+    alembic_args = [
+        '-q',
+        '--raiseerr',
+        'downgrade',
+        revision,
+    ]
+    alembic.config.main(argv=alembic_args)
+
 
 @app.function()
 def health_check():
