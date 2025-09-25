@@ -6,7 +6,6 @@ from uuid import uuid4
 
 from tenflow.core import security
 from tenflow.models import User, TrainingPlan
-from sqlmodel import Session
 
 
 @pytest.fixture

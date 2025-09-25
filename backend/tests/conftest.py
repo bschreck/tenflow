@@ -1,6 +1,6 @@
 import pytest
 import uuid
-from sqlmodel import text, create_engine, Session, select
+from sqlalchemy import text, create_engine
 import alembic.config
 import os
 import importlib
@@ -137,18 +137,11 @@ def clear_all_tables(session):
 async def session(db_created, env_vars):
     """Provide a clean database session for each test."""
     # need to be lazy to pick up the new database name
-    from tenflow.database import get_session
+    from tenflow.database import session_context
     
-    # Create a new session
-    session = get_session()
-    
-    # Clear all data before the test
-    clear_all_tables(session)
-    
-    yield session
-    
-    # Clean up after the test
-    session.close()
+    with session_context() as session:
+        clear_all_tables(session)
+        yield session
 
 
 @pytest.fixture(name='async_client')

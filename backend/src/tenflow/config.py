@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = 'password'
     POSTGRES_HOST: str = 'localhost'
     POSTGRES_PORT: int = 5432
+    DATABASE_POOL_SIZE: int = 10
+    DATABASE_MAX_OVERFLOW: int = 20
+    DATABASE_POOL_RECYCLE: int = 3600
+    DATABASE_POOL_TIMEOUT: int = 31
+    LOGLEVEL: str = 'INFO'
 
     # Security
     SECRET_KEY: str = 'your-secret-key-here-change-in-production'

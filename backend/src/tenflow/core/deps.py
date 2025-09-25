@@ -2,16 +2,17 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from pydantic import ValidationError
-from sqlmodel import Session, select
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from tenflow.config import settings
-from tenflow.database import get_session_gen
+from tenflow.database import get_read_only_session_gen
 from tenflow.models import User, TokenPayload
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f'{settings.API_V1_STR}/auth/login')
 
 
-def get_current_user(session: Session = Depends(get_session_gen), token: str = Depends(oauth2_scheme)) -> User:
+def get_current_user(session: Session = Depends(get_read_only_session_gen), token: str = Depends(oauth2_scheme)) -> User:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         token_data = TokenPayload(**payload)
@@ -22,17 +23,16 @@ def get_current_user(session: Session = Depends(get_session_gen), token: str = D
         ) from e
 
     statement = select(User).where(User.id == token_data.sub)
-    user = session.exec(statement).first()
-
-    if not user:
+    row = session.execute(statement).first()
+    if len(row) == 0 or not row[0]:
         raise HTTPException(status_code=404, detail='User not found')
-    return user
+    return row[0]
 
 
 def get_current_active_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
-    if not current_user.is_active:
+    if not current_user.is_active or not current_user.access_token:
         raise HTTPException(status_code=400, detail='Inactive user')
     return current_user
 

@@ -6,7 +6,6 @@ from uuid import uuid4
 
 from tenflow.core import security
 from tenflow.models import User, TrainingPlan
-from sqlmodel import Session
 
 
 @pytest.fixture
@@ -14,10 +13,13 @@ async def test_user_with_training_plans(session):
     """Create a test user with some training plans."""
     # Create user with unique email
     unique_email = f"testuser-{uuid4().hex[:8]}@example.com"
+    user_id = uuid4()
     user = User(
+        id=user_id,
         email=unique_email,
         full_name="Test User",
         hashed_password=security.get_password_hash("testpassword"),
+        access_token=security.create_access_token(subject=user_id),
         is_active=True,
         is_superuser=False,
     )
@@ -27,7 +29,7 @@ async def test_user_with_training_plans(session):
     
     # Create some training plans for the user
     training_plan_1 = TrainingPlan(
-        user_id=user.id,
+        user=user,
         goal="Marathon Training",
         plan_name="16-Week Marathon Plan",
         start_date=date.today(),
@@ -38,11 +40,11 @@ async def test_user_with_training_plans(session):
         weekly_distance_peak=Decimal("80.0"),
         training_days_per_week=5,
         plan_data={"test": "data"},
-        is_active=True
+        is_active=True,
     )
     
     training_plan_2 = TrainingPlan(
-        user_id=user.id,
+        user=user,
         goal="5K Training",
         plan_name="8-Week 5K Plan",
         start_date=date.today() + timedelta(weeks=20),
@@ -53,7 +55,7 @@ async def test_user_with_training_plans(session):
         weekly_distance_peak=Decimal("30.0"),
         training_days_per_week=3,
         plan_data={"test": "data2"},
-        is_active=True
+        is_active=True,
     )
     
     session.add(training_plan_1)
@@ -124,10 +126,13 @@ async def test_get_user_me_empty_training_plans(
     """Test that GET /users/me works for users with no training plans."""
     # Create user with unique email and no training plans
     unique_email = f"testuser-{uuid4().hex[:8]}@example.com"
+    user_id = uuid4()
     user = User(
+        id=user_id,
         email=unique_email,
         full_name="Test User No Plans",
         hashed_password=security.get_password_hash("testpassword"),
+        access_token=security.create_access_token(subject=user_id),
         is_active=True,
         is_superuser=False,
     )
@@ -136,7 +141,7 @@ async def test_get_user_me_empty_training_plans(
     session.refresh(user)
     
     # Create auth headers
-    access_token = security.create_access_token(subject=user.id)
+    access_token = security.create_access_token(subject=user_id)
     auth_headers = {"Authorization": f"Bearer {access_token}"}
     
     response = await async_client.get(

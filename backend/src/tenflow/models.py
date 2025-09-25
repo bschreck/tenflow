@@ -1,110 +1,161 @@
-from typing import Optional, Any
+from typing import Any
 from datetime import datetime, date
+import datetime as dt 
 from uuid import UUID, uuid4
 from decimal import Decimal
-from sqlmodel import Field, SQLModel, Relationship, Column, JSON
-import enum
+from sqlalchemy import (
+    String, 
+    Boolean, 
+    DateTime, 
+    Date, 
+    UUID as SAUUID, 
+    ForeignKey, 
+    Integer,
+    Enum,
+    Numeric
+)
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import MappedAsDataclass, Mapped, mapped_column, relationship, DeclarativeBase
+from pydantic import BaseModel
+from enum import StrEnum
 
+class Base(MappedAsDataclass, DeclarativeBase):
+    pass
 
-# User Models
-class UserBase(SQLModel):
-    email: str = Field(unique=True, index=True)
+class User(Base):
+    __tablename__ = 'users'
+    email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    full_name: Mapped[str | None] = mapped_column(String(50))
+    hashed_password: Mapped[str] = mapped_column(String(255))
+    id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
+    is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
+    is_superuser: Mapped[bool] = mapped_column(Boolean(), default=False)
+    access_token: Mapped[str | None] = mapped_column(String(255), default=None)
+    created_at: Mapped[datetime] = mapped_column(default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime | None] = mapped_column(default_factory=lambda: dt.datetime.now(dt.UTC))
+
+    compliance_scores: Mapped[list["ComplianceScore"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan",
+        default_factory=list
+    )
+    training_plans: Mapped[list["TrainingPlan"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan",
+        default_factory=list
+    )
+    prescribed_workouts: Mapped[list['PrescribedWorkout']] = relationship(
+        back_populates='user',
+        cascade="all, delete-orphan",
+        default_factory=list
+    )
+    strava_connections: Mapped[list["StravaConnection"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan",
+        default_factory=list
+    )
+    training_activities: Mapped[list["TrainingActivity"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan",
+        default_factory=list
+    )
+
+class UserBase(BaseModel):
+    id: UUID | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    training_plans: list['TrainingPlanRead'] = []
+    email: str | None = None
     full_name: str | None = None
+    access_token: str | None = None
     is_active: bool = True
     is_superuser: bool = False
 
-
-class User(UserBase, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    hashed_password: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime | None = None
-
-    # Relationships
-    training_plans: list['TrainingPlan'] = Relationship(back_populates='user')
-
+class UserRead(UserBase):
+    id: UUID
+    email: str
+    full_name: str
+    created_at: datetime
+    updated_at: datetime
+    access_token: str
 
 class UserCreate(UserBase):
     password: str
-
-
-class UserRead(UserBase):
-    id: UUID
+    email: str
+    full_name: str
     created_at: datetime
-    updated_at: datetime | None = None
-    training_plans: list['TrainingPlanRead'] = []
+    updated_at: datetime
 
 
-class UserUpdate(SQLModel):
+class UserPublicUpdate(UserBase):
     email: str | None = None
     full_name: str | None = None
     password: str | None = None
+
+class UserUpdate(UserPublicUpdate):
     is_active: bool | None = None
     is_superuser: bool | None = None
 
 
 # Auth Models
-class Token(SQLModel):
+class Token(BaseModel):
     access_token: str
     token_type: str = 'bearer'
 
 
-class TokenPayload(SQLModel):
+class TokenPayload(BaseModel):
     sub: UUID | None = None
 
 
-# ============================
-# Lovable/Supabase demo models
-# ============================
-
-
-class ComplianceScore(SQLModel, table=True):
+class ComplianceScore(Base):
     __tablename__ = 'compliance_scores'
 
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(index=True)
-    week_start: date
+    user_id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), init=False)
+    week_start: Mapped[dt.date] = mapped_column(Date())
 
-    workout_compliance: Decimal | None = Field(default=Decimal(0))
-    intensity_compliance: Decimal | None = Field(default=Decimal(0))
-    recovery_compliance: Decimal | None = Field(default=Decimal(0))
-    overall_compliance: Decimal | None = Field(default=Decimal(0))
+    id: Mapped[UUID] = mapped_column(SAUUID(), default_factory=uuid4, primary_key=True)
 
-    activities_prescribed: int | None = Field(default=0)
-    activities_completed: int | None = Field(default=0)
+    workout_compliance: Mapped[Decimal | None] = mapped_column(Numeric(), default=Decimal(0))
+    intensity_compliance: Mapped[Decimal | None] = mapped_column(Numeric(), default=Decimal(0))
+    recovery_compliance: Mapped[Decimal | None] = mapped_column(Numeric(), default=Decimal(0))
+    overall_compliance: Mapped[Decimal | None] = mapped_column(Numeric(), default=Decimal(0))
 
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    activities_prescribed: Mapped[int | None] = mapped_column(Integer(), default=0)
+    activities_completed: Mapped[int | None] = mapped_column(Integer(), default=0)
 
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
 
-class TrainingPlanBase(SQLModel):
-    user_id: UUID = Field(foreign_key='user.id')
-    goal: str
-    plan_name: str
-    start_date: date
-    end_date: date
-    duration_weeks: int
-    fitness_level: str
-    weekly_distance_base: Decimal
-    weekly_distance_peak: Decimal
-    training_days_per_week: int
-    plan_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
-    is_active: bool = True
+    user: Mapped["User"] = relationship(back_populates="compliance_scores", default=None)
 
 
-class TrainingPlan(TrainingPlanBase, table=True):
+class TrainingPlan(Base):
     __tablename__ = 'training_plans'
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
+    
+    goal: Mapped[str] = mapped_column(String(50))
+    plan_name: Mapped[str] = mapped_column(String(50))
+    start_date: Mapped[dt.date] = mapped_column(Date())
+    end_date: Mapped[dt.date] = mapped_column(Date())
+    duration_weeks: Mapped[int] = mapped_column(Integer())
+    fitness_level: Mapped[str] = mapped_column(String(50))
+    weekly_distance_base: Mapped[Decimal] = mapped_column(Numeric())
+    weekly_distance_peak: Mapped[Decimal] = mapped_column(Numeric())
+    training_days_per_week: Mapped[int] = mapped_column(Integer())
+    plan_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB())
 
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    user: Mapped["User"] = relationship(back_populates="training_plans", default=None)
+    prescribed_workouts: Mapped[list['PrescribedWorkout']] = relationship(
+        back_populates='training_plan',
+        cascade="all, delete-orphan",
+        default_factory=list
+    )
 
-    # Relationships
-    user: 'User' = Relationship(back_populates='training_plans')
-    prescribed_workouts: list['PrescribedWorkout'] = Relationship(back_populates='training_plan')
+    id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
+    is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
 
 
-class TrainingPlanCreate(SQLModel):
+class TrainingPlanBase(BaseModel):
+    id: UUID | None = None
     goal: str
     plan_name: str
     start_date: date
@@ -114,17 +165,21 @@ class TrainingPlanCreate(SQLModel):
     weekly_distance_base: Decimal
     weekly_distance_peak: Decimal
     training_days_per_week: int
-    plan_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
+    plan_data: dict[str, Any] | None = None
     is_active: bool = True
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
+class TrainingPlanCreate(TrainingPlanBase):
+    pass
 
 class TrainingPlanRead(TrainingPlanBase):
     id: UUID
     created_at: datetime
     updated_at: datetime
 
-
-class TrainingPlanUpdate(SQLModel):
+class TrainingPlanUpdate(TrainingPlanBase):
+    id: UUID
     goal: str | None = None
     plan_name: str | None = None
     start_date: date | None = None
@@ -138,91 +193,127 @@ class TrainingPlanUpdate(SQLModel):
     is_active: bool | None = None
 
 
-class PrescribedWorkoutBase(SQLModel):
-    training_plan_id: UUID = Field(foreign_key='training_plans.id')
+class WorkoutTimeOfDay(StrEnum):
+    MORNING = 'morning'
+    AFTERNOON = 'afternoon'
+    
+class IntensityZone(StrEnum):
+    Z1 = 'z1'
+    Z2 = 'z2'
+    Z3 = 'z3'
+    Z4 = 'z4'
+    Z5 = 'z5'
+
+class PrescribedWorkout(Base):
+    __tablename__ = 'prescribed_workouts'
+    training_plan_id: Mapped[UUID] = mapped_column(ForeignKey("training_plans.id"), init=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
+    workout_date: Mapped[dt.date] = mapped_column(Date())
+    workout_time: Mapped[WorkoutTimeOfDay] = mapped_column(Enum('morning', 'afternoon', name='WorkoutTimeOfDay'))
+    workout_type: Mapped[str] = mapped_column(String(50))
+    distance: Mapped[Decimal] = mapped_column(Numeric())
+    duration_minutes: Mapped[int | None] = mapped_column(Integer())
+    intensity_zone: Mapped[IntensityZone | None] = mapped_column(Enum(*[f'z{i}' for i in range(1,6)], name='IntensityZone'))
+    rpe_target: Mapped[int | None] = mapped_column(Integer())
+    workout_description: Mapped[str | None] = mapped_column(String(1000))
+
+    user: Mapped[User] = relationship(back_populates='prescribed_workouts', default=None)
+    training_plan: Mapped[TrainingPlan | None] = relationship(back_populates='prescribed_workouts', default=None)
+    training_activities: Mapped[list["TrainingActivity"]] = relationship(
+        back_populates="prescribed_workout", cascade="all, delete-orphan",
+        default_factory=list
+    )
+
+    id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
+    workout_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB(), default=None)
+    is_completed: Mapped[bool] = mapped_column(Boolean(), default=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+
+class PrescribedWorkoutBase(BaseModel):
+    id: UUID | None = None
+    training_plan_id: UUID
     user_id: UUID
-    workout_date: date
+    workout_date: dt.date
+    workout_time: WorkoutTimeOfDay
     workout_type: str
-    distance: Decimal | None = None
+    distance: Decimal
     duration_minutes: int | None = None
-    intensity_zone: str | None = None
+    intensity_zone: IntensityZone | None = None
     rpe_target: int | None = None
     workout_description: str | None = None
-    workout_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
+    workout_data: dict[str, Any] | None = None
     is_completed: bool = False
 
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
-class PrescribedWorkout(PrescribedWorkoutBase, table=True):
-    __tablename__ = 'prescribed_workouts'
+class PrescribedWorkoutCreate(PrescribedWorkoutBase):
+    pass
 
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+class PrescribedWorkoutRead(PrescribedWorkoutBase):
+    id: UUID
+    created_at: datetime
+    updated_at: datetime
 
-    # Relationships
-    training_plan: TrainingPlan | None = Relationship(back_populates='prescribed_workouts')
-
-
-class Profile(SQLModel, table=True):
-    __tablename__ = 'profiles'
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(unique=True, index=True)
-    email: str | None = None
-    first_name: str | None = None
-    last_name: str | None = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+class PrescribedWorkoutUpdate(PrescribedWorkoutBase):
+    id: UUID
+    training_plan_id: UUID | None = None
+    user_id: UUID | None = None
+    workout_date: dt.date | None = None
+    workout_time: WorkoutTimeOfDay | None = None
+    workout_type: str | None = None
+    distance: Decimal | None = None
+    is_completed: bool | None = None
 
 
-class StravaConnection(SQLModel, table=True):
+class StravaConnection(Base):
     __tablename__ = 'strava_connections'
 
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(unique=True, index=True)
-    strava_user_id: str
-    access_token: str
-    refresh_token: str
-    expires_at: datetime
-    athlete_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
-    connected_at: datetime = Field(default_factory=datetime.utcnow)
-    last_sync: datetime | None = None
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
+    strava_user_id: Mapped[str] = mapped_column(String(50))
+    access_token: Mapped[str] = mapped_column(String(50))
+    refresh_token: Mapped[str] = mapped_column(String(50))
+    expires_at: Mapped[dt.datetime] = mapped_column(DateTime())
+    athlete_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB())
 
+    user: Mapped["User"] = relationship(back_populates="strava_connections", default=None)
+    id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
+    connected_at: Mapped[dt.datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    last_sync: Mapped[dt.datetime | None] = mapped_column(DateTime(), default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
 
-class Subscriber(SQLModel, table=True):
-    __tablename__ = 'subscribers'
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(unique=True, index=True)
-    email: str | None = None
-    stripe_customer_id: str | None = None
-    subscribed: bool | None = Field(default=False)
-    subscription_tier: str | None = Field(default='free')
-    subscription_end: datetime | None = None
-    stripe_subscription_id: str | None = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-
-
-class TrainingActivity(SQLModel, table=True):
+class TrainingActivity(Base):
     __tablename__ = 'training_activities'
 
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(index=True)
-    strava_activity_id: str | None = None
-    name: str
-    activity_type: str
-    prescribed_workout: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
-    actual_workout: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
-    compliance_score: Decimal | None = None
-    distance: Decimal | None = None
-    moving_time: int | None = None
-    elapsed_time: int | None = None
-    total_elevation_gain: Decimal | None = None
-    start_date: datetime
-    average_heartrate: int | None = None
-    max_heartrate: int | None = None
-    rpe_prescribed: int | None = None
-    rpe_actual: int | None = None
-    activity_data: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON))
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), init=False)
+
+    name: Mapped[str] = mapped_column(String(1000))
+    activity_type: Mapped[str] = mapped_column(String(50))
+
+    prescribed_workout_id: Mapped[UUID] = mapped_column(ForeignKey("prescribed_workouts.id"), init=False)
+
+    actual_workout: Mapped[dict[str, Any] | None] = mapped_column(JSONB())
+    activity_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB())
+    start_date: Mapped[datetime] = mapped_column(DateTime())
+
+    id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
+    strava_activity_id: Mapped[str | None] = mapped_column(String(50), default=None)
+    distance: Mapped[Decimal | None] = mapped_column(Numeric(), default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    compliance_score: Mapped[Decimal | None] = mapped_column(Numeric(), default=None)
+    moving_time: Mapped[int | None] = mapped_column(Integer(), default=None)
+    elapsed_time: Mapped[int | None] = mapped_column(Integer(), default=None)
+    total_elevation_gain: Mapped[Decimal | None] = mapped_column(Numeric(), default=None)
+    average_heartrate: Mapped[int | None] = mapped_column(Integer(), default=None)
+    max_heartrate: Mapped[int | None] = mapped_column(Integer(), default=None)
+    rpe_prescribed: Mapped[int | None] = mapped_column(Integer(), default=None)
+    rpe_actual: Mapped[int | None] = mapped_column(Integer(), default=None)
+
+    user: Mapped["User"] = relationship(back_populates="training_activities", default=None)
+    prescribed_workout: Mapped["PrescribedWorkout"] = relationship(
+        back_populates="training_activities", default_factory=list
+    )
