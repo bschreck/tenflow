@@ -31,8 +31,8 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean(), default=False)
     access_token: Mapped[str | None] = mapped_column(String(255), default=None)
-    created_at: Mapped[datetime] = mapped_column(default_factory=lambda: dt.datetime.now(dt.UTC))
-    updated_at: Mapped[datetime | None] = mapped_column(default_factory=lambda: dt.datetime.now(dt.UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
 
     compliance_scores: Mapped[list["ComplianceScore"]] = relationship(
         back_populates="user", cascade="all, delete-orphan",
@@ -119,8 +119,8 @@ class ComplianceScore(Base):
     activities_prescribed: Mapped[int | None] = mapped_column(Integer(), default=0)
     activities_completed: Mapped[int | None] = mapped_column(Integer(), default=0)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
 
     user: Mapped["User"] = relationship(back_populates="compliance_scores", default=None)
 
@@ -150,8 +150,8 @@ class TrainingPlan(Base):
     id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
 
 
 class TrainingPlanBase(BaseModel):
@@ -228,8 +228,8 @@ class PrescribedWorkout(Base):
     workout_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB(), default=None)
     is_completed: Mapped[bool] = mapped_column(Boolean(), default=False)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
 
 class PrescribedWorkoutBase(BaseModel):
     id: UUID | None = None
@@ -275,15 +275,15 @@ class StravaConnection(Base):
     strava_user_id: Mapped[str] = mapped_column(String(50))
     access_token: Mapped[str] = mapped_column(String(50))
     refresh_token: Mapped[str] = mapped_column(String(50))
-    expires_at: Mapped[dt.datetime] = mapped_column(DateTime())
+    expires_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True))
     athlete_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB())
 
     user: Mapped["User"] = relationship(back_populates="strava_connections", default=None)
     id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
-    connected_at: Mapped[dt.datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
-    last_sync: Mapped[dt.datetime | None] = mapped_column(DateTime(), default=None)
-    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    connected_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
+    last_sync: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
 
 class TrainingActivity(Base):
     __tablename__ = 'training_activities'
@@ -297,13 +297,13 @@ class TrainingActivity(Base):
 
     actual_workout: Mapped[dict[str, Any] | None] = mapped_column(JSONB())
     activity_data: Mapped[dict[str, Any] | None] = mapped_column(JSONB())
-    start_date: Mapped[datetime] = mapped_column(DateTime())
+    start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
     id: Mapped[UUID] = mapped_column(SAUUID(), primary_key=True, default_factory=uuid4)
     strava_activity_id: Mapped[str | None] = mapped_column(String(50), default=None)
     distance: Mapped[Decimal | None] = mapped_column(Numeric(), default=None)
-    created_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(), default_factory=lambda: dt.datetime.now(dt.UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: dt.datetime.now(dt.UTC))
     compliance_score: Mapped[Decimal | None] = mapped_column(Numeric(), default=None)
     moving_time: Mapped[int | None] = mapped_column(Integer(), default=None)
     elapsed_time: Mapped[int | None] = mapped_column(Integer(), default=None)

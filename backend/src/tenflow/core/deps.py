@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from pydantic import ValidationError
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from tenflow.config import settings
 from tenflow.database import get_read_only_session_gen
@@ -12,7 +12,7 @@ from tenflow.models import User, TokenPayload
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f'{settings.API_V1_STR}/auth/login')
 
 
-def get_current_user(session: Session = Depends(get_read_only_session_gen), token: str = Depends(oauth2_scheme)) -> User:
+async def get_current_user(session: Session = Depends(get_read_only_session_gen), token: str = Depends(oauth2_scheme)) -> User:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         token_data = TokenPayload(**payload)
@@ -22,9 +22,9 @@ def get_current_user(session: Session = Depends(get_read_only_session_gen), toke
             detail='Could not validate credentials',
         ) from e
 
-    statement = select(User).where(User.id == token_data.sub)
-    row = session.execute(statement).first()
-    if len(row) == 0 or not row[0]:
+    statement = select(User).options(selectinload(User.training_plans)).where(User.id == token_data.sub)
+    row = (await session.execute(statement)).first()
+    if row is None or len(row) == 0 or not row[0]:
         raise HTTPException(status_code=404, detail='User not found')
     return row[0]
 

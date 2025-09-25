@@ -1,7 +1,8 @@
 from logging.config import fileConfig
+import asyncio
 
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 from tenflow.config import settings
@@ -65,17 +66,37 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix='sqlalchemy.',
+    connectable = create_async_engine(
+        settings.get_postgres_url(),
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
+    def do_run_migrations_sync(connection):
         context.configure(connection=connection, target_metadata=target_metadata)
-
         with context.begin_transaction():
             context.run_migrations()
+
+    async def do_run_migrations():
+        async with connectable.connect() as connection:
+            await connection.run_sync(do_run_migrations_sync)
+
+    # Check if we're already in an async context
+    try:
+        loop = asyncio.get_running_loop()
+        # We're already in an event loop, use asyncio.run_coroutine_threadsafe
+        import concurrent.futures
+        import threading
+        
+        def run_in_thread():
+            asyncio.run(do_run_migrations())
+        
+        # Run in a separate thread to avoid nested event loop issues
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(run_in_thread)
+            future.result()
+    except RuntimeError:
+        # No event loop running, we can use asyncio.run()
+        asyncio.run(do_run_migrations())
 
 
 if context.is_offline_mode():

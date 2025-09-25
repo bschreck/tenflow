@@ -9,7 +9,7 @@ from tenflow.models import User, TrainingPlan
 
 
 @pytest.fixture
-async def test_user_with_training_plans(session):
+async def test_user_with_training_plans_id(session):
     """Create a test user with some training plans."""
     # Create user with unique email
     unique_email = f"testuser-{uuid4().hex[:8]}@example.com"
@@ -24,8 +24,8 @@ async def test_user_with_training_plans(session):
         is_superuser=False,
     )
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     
     # Create some training plans for the user
     training_plan_1 = TrainingPlan(
@@ -60,17 +60,18 @@ async def test_user_with_training_plans(session):
     
     session.add(training_plan_1)
     session.add(training_plan_2)
-    session.commit()
-    session.refresh(training_plan_1)
-    session.refresh(training_plan_2)
+    await session.commit()
+    await session.refresh(training_plan_1)
+    await session.refresh(training_plan_2)
     
-    return user
+    # Return just the user ID to avoid session issues
+    return user_id
 
 
 @pytest.fixture
-async def auth_headers_for_user_with_plans(test_user_with_training_plans):
+async def auth_headers_for_user_with_plans(test_user_with_training_plans_id):
     """Create authentication headers for the test user with training plans."""
-    access_token = security.create_access_token(subject=test_user_with_training_plans.id)
+    access_token = security.create_access_token(subject=test_user_with_training_plans_id)
     return {"Authorization": f"Bearer {access_token}"}
 
 
@@ -137,8 +138,8 @@ async def test_get_user_me_empty_training_plans(
         is_superuser=False,
     )
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     
     # Create auth headers
     access_token = security.create_access_token(subject=user_id)

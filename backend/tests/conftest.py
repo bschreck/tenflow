@@ -1,6 +1,7 @@
 import pytest
 import uuid
-from sqlalchemy import text, create_engine
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
 import alembic.config
 import os
 import importlib
@@ -41,21 +42,24 @@ def env_vars(worker_id):
 
     importlib.reload(config)
 
-    # Reset database engine so new settings are used when sessions are created
+    # Reset database engines and sessions to ensure fresh start
     import tenflow.database as db
 
     db.engine = None
+    db.read_only_engine = None
+    db.Session = None
+    db.ReadOnlySession = None
 
     return env
 
 
-def drop_database(conn, db_name):
+async def drop_database(conn, db_name):
     if db_name == os.environ['ORIGINAL_POSTGRES_DATABASE']:
         raise ValueError(f'Cowardly refusing to drop original database {db_name}')
     
     # First, terminate all connections to the database
     try:
-        conn.execute(text(f"""
+        await conn.execute(text(f"""
             SELECT pg_terminate_backend(pg_stat_activity.pid)
             FROM pg_stat_activity
             WHERE pg_stat_activity.datname = '{db_name}'
@@ -65,30 +69,30 @@ def drop_database(conn, db_name):
         pass
     
     # Now drop the database
-    conn.execute(text(f'DROP DATABASE IF EXISTS "{db_name}"'))
+    await conn.execute(text(f'DROP DATABASE IF EXISTS "{db_name}"'))
 
 
 @pytest.fixture(scope='session')
 async def root_engine(env_vars):
     from tenflow.config import settings
 
-    engine = create_engine(settings.get_root_postgres_url(), isolation_level='AUTOCOMMIT', echo=False)
+    engine = create_async_engine(settings.get_root_postgres_url(), isolation_level='AUTOCOMMIT', echo=False)
     yield engine
-    engine.dispose()
+    await engine.dispose()
 
 
 @pytest.fixture(scope='session')
 async def db_created(root_engine, env_vars):
     """Create the database once per worker session."""
-    with root_engine.connect() as conn:
+    async with root_engine.begin() as conn:
         # Drop database if it exists (in case of previous failed run)
         try:
-            drop_database(conn, env_vars['POSTGRES_DATABASE'])
+            await drop_database(conn, env_vars['POSTGRES_DATABASE'])
         except Exception:
             pass
         
         # Create new database
-        conn.execute(text(f'CREATE DATABASE "{env_vars["POSTGRES_DATABASE"]}"'))
+        await conn.execute(text(f'CREATE DATABASE "{env_vars["POSTGRES_DATABASE"]}"'))
         
         # Run migrations once
         alembic_args = [
@@ -104,16 +108,22 @@ async def db_created(root_engine, env_vars):
         # Clean up at the end of the session
         import tenflow.database as db
         if db.engine:
-            db.engine.dispose()
+            await db.engine.dispose()
             db.engine = None
+        if db.read_only_engine:
+            await db.read_only_engine.dispose()
+            db.read_only_engine = None
+        # Reset sessions as well
+        db.Session = None
+        db.ReadOnlySession = None
         
-        drop_database(conn, env_vars['POSTGRES_DATABASE'])
+        await drop_database(conn, env_vars['POSTGRES_DATABASE'])
 
 
-def clear_all_tables(session):
+async def clear_all_tables(session):
     """Clear all tables in the database while preserving schema."""
     # Get all table names from the database
-    result = session.execute(text("""
+    result = await session.execute(text("""
         SELECT tablename FROM pg_tables 
         WHERE schemaname = 'public' 
         AND tablename NOT IN ('alembic_version')
@@ -121,26 +131,45 @@ def clear_all_tables(session):
     tables = [row[0] for row in result]
     
     # Disable foreign key checks temporarily
-    session.execute(text('SET session_replication_role = replica'))
+    await session.execute(text('SET session_replication_role = replica'))
     
     # Truncate all tables
     for table in tables:
-        session.execute(text(f'TRUNCATE TABLE "{table}" CASCADE'))
+        await session.execute(text(f'TRUNCATE TABLE "{table}" CASCADE'))
     
     # Re-enable foreign key checks
-    session.execute(text('SET session_replication_role = DEFAULT'))
+    await session.execute(text('SET session_replication_role = DEFAULT'))
     
-    session.commit()
+    await session.commit()
 
 
 @pytest.fixture
 async def session(db_created, env_vars):
     """Provide a clean database session for each test."""
-    # need to be lazy to pick up the new database name
+    # Force recreation of engines in the current event loop context
+    import tenflow.database as db
+    
+    # Clear existing engines to force recreation in current loop
+    if db.engine:
+        try:
+            await db.engine.dispose()
+        except:
+            pass
+        db.engine = None
+    if db.read_only_engine:
+        try:
+            await db.read_only_engine.dispose()
+        except:
+            pass
+        db.read_only_engine = None
+    db.Session = None
+    db.ReadOnlySession = None
+    
+    # Now get a fresh session
     from tenflow.database import session_context
     
-    with session_context() as session:
-        clear_all_tables(session)
+    async with session_context() as session:
+        await clear_all_tables(session)
         yield session
 
 
