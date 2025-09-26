@@ -13,16 +13,19 @@ async def test_user(session):
     """Create a test user for authentication."""
     # Use unique email to avoid conflicts across test workers
     unique_email = f"testuser-{uuid4().hex[:8]}@example.com"
+    user_id = uuid4()
     user = User(
+        id=user_id,
         email=unique_email,
         full_name="Test User",
         hashed_password=security.get_password_hash("testpassword"),
+        access_token=security.create_access_token(subject=user_id),
         is_active=True,
         is_superuser=False,
     )
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     return user
 
 
@@ -61,7 +64,7 @@ async def sample_training_plan_data(test_user):
 async def created_training_plan(session, test_user):
     """Create a training plan in the database for testing."""
     training_plan = TrainingPlan(
-        user_id=test_user.id,
+        user=test_user,
         goal="Test Marathon Training",
         plan_name="Test 16-Week Marathon Plan",
         start_date=date.today(),
@@ -75,8 +78,8 @@ async def created_training_plan(session, test_user):
         is_active=True
     )
     session.add(training_plan)
-    session.commit()
-    session.refresh(training_plan)
+    await session.commit()
+    await session.refresh(training_plan)
     return training_plan
 
 
@@ -257,23 +260,26 @@ async def test_read_training_plan_forbidden(
 ):
     """Test retrieving another user's training plan."""
     # Create another user with unique email
+    created_training_plan_id = created_training_plan.id
     unique_email = f"otheruser-{uuid4().hex[:8]}@example.com"
+    other_user_id = uuid4()
     other_user = User(
+        id=other_user_id,
         email=unique_email,
         full_name="Other User",
         hashed_password=security.get_password_hash("password"),
+        access_token=security.create_access_token(subject=other_user_id),
         is_active=True,
     )
     session.add(other_user)
-    session.commit()
-    session.refresh(other_user)
+    await session.commit()
+    await session.refresh(other_user)
     
     # Create auth headers for the other user
-    access_token = security.create_access_token(subject=other_user.id)
-    other_auth_headers = {"Authorization": f"Bearer {access_token}"}
+    other_auth_headers = {"Authorization": f"Bearer {other_user.access_token}"}
     
     response = await async_client.get(
-        f"/api/v1/training-plans/{created_training_plan.id}",
+        f"/api/v1/training-plans/{created_training_plan_id}",
         headers=other_auth_headers
     )
     
@@ -289,12 +295,13 @@ async def test_update_training_plan_success(
     """Test successful update of a training plan."""
     update_data = {
         "goal": "Updated Marathon Training",
-        "plan_name": "Updated 16-Week Marathon Plan",
-        "fitness_level": "advanced"
+        "plan_name": "Updated 16-Week Marathon Plan 2",
+        "fitness_level": "advanced",
+        "id": str(created_training_plan.id)
     }
     
     response = await async_client.put(
-        f"/api/v1/training-plans/{created_training_plan.id}",
+        f"/api/v1/training-plans/",
         json=update_data,
         headers=auth_headers
     )
@@ -312,10 +319,13 @@ async def test_update_training_plan_partial(
     async_client: AsyncClient, auth_headers, created_training_plan
 ):
     """Test partial update of a training plan."""
-    update_data = {"goal": "Partial Update Goal"}
+    update_data = {
+        "goal": "Partial Update Goal", 
+        "id": str(created_training_plan.id), 
+    }
     
     response = await async_client.put(
-        f"/api/v1/training-plans/{created_training_plan.id}",
+        f"/api/v1/training-plans/",
         json=update_data,
         headers=auth_headers
     )
@@ -333,10 +343,10 @@ async def test_update_training_plan_not_found(
 ):
     """Test updating a non-existent training plan."""
     fake_id = uuid4()
-    update_data = {"goal": "Updated Goal"}
+    update_data = {"goal": "Updated Goal", "id": str(fake_id)}
     
     response = await async_client.put(
-        f"/api/v1/training-plans/{fake_id}",
+        f"/api/v1/training-plans/",
         json=update_data,
         headers=auth_headers
     )
@@ -349,10 +359,10 @@ async def test_update_training_plan_unauthorized(
     async_client: AsyncClient, created_training_plan
 ):
     """Test updating a training plan without authentication."""
-    update_data = {"goal": "Updated Goal"}
+    update_data = {"goal": "Updated Goal", "id": str(created_training_plan.id)}
     
     response = await async_client.put(
-        f"/api/v1/training-plans/{created_training_plan.id}",
+        f"/api/v1/training-plans/",
         json=update_data
     )
     

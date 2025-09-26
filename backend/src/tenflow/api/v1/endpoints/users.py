@@ -33,7 +33,7 @@ async def create_user(
             is_active=user_in.is_active,
             is_superuser=user_in.is_superuser,
         )
-        await session.add(user)
+        session.add(user)
         await session.commit()
         session.refresh(user)
         user_read = UserRead.model_validate(user, from_attributes=True)
